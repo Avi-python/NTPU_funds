@@ -3,6 +3,7 @@ import address from '../abis/contractAddress.json';
 import { getGlobalState, setGlobalState } from '../store';
 import { ethers } from 'ethers';
 
+
 const { ethereum } = window;
 const contractAddress = address.address;
 const contractAbi = abi.abi;
@@ -42,6 +43,21 @@ const isWallectConnected = async () => {
     reportError(error);
   };
 };
+
+const getSignature = async (message) => {
+  const provider = new ethers.providers.Web3Provider(ethereum);
+  const signer = provider.getSigner();
+  const messageHash = ethers.utils.id(message);
+  const messageBytes = ethers.utils.toUtf8Bytes(messageHash);
+  
+  try {
+    const signature = await signer.signMessage(messageBytes);
+    return { signature: signature, msg_hash: messageHash };
+  } catch (error) {
+    reportError(error);
+  }
+
+}
 
 const getEtheriumContract = async () => {
   const contract = getGlobalState('contract');
@@ -241,6 +257,7 @@ const reportError = (error) => {
 export {
   connectWallet,
   isWallectConnected,
+  getSignature,
   createProject,
   updateProject,
   deleteProject,

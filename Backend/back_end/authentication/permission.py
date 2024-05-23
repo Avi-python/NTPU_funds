@@ -1,9 +1,18 @@
 from rest_framework import permissions
+from web3 import Web3, HTTPProvider
 
-class IsWalletOwner(permissions.BasePermission):
+class IsProjectCreator(permissions.BasePermission):
+
+    def has_object_permission(self, request, view, obj): # 確認是否是project的creator，才可以修改資料
+
+        
+
+        return 
     
-    def has_object_permission(self, request, view, obj):
 
+class IsProjectFollower(permissions.BasePermission):
 
+    def has_object_permission(self, request, view, obj): # 確認是否是project的follower，才可以獲取資料
 
-        return obj.owner == request.user
+        
+        return
