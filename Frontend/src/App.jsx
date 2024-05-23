@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom"
 import Header from "./components/Header"
 import Home from "./views/Home"
 import Project from "./views/Project"
+import Register from "./views/Register"
 import { isWallectConnected } from "./services/blockchain"
 import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
@@ -37,6 +38,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/projects/:id" element={<Project />} />
+          <Route path="/register" element={<Register />} />
         </Routes>
       ) : null}
 
