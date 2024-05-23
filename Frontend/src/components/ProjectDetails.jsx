@@ -43,20 +43,20 @@ const ProjectDetails = ({ project }) => {
                                             ? (
                                                 <small className="text-gray-700">{truncate(project.owner, 4, 4, 11)}r</small>
                                             ) : null}
-                                        <small className="text-gray-500 font-bold">{project?.backers} Backer{project?.backers == 1 ? '' : 's'}</small>
+                                        <small className="text-gray-500 font-bold">{project?.backers} Backer{project?.backers === 1 ? '' : 's'}</small>
                                     </div>
 
                                     <div className="font-bold">
                                         {
                                             isExpired ? // TODO : 要調整一下，過期是否要將錢退給 backers，從而變成 Reverted。
                                                 (<small className='text-red-500'>Expired</small>)
-                                                : project?.status == 0
+                                                : project?.status === 0
                                                     ? (<small className='text-gray-500'>Open</small>)
-                                                    : project?.status == 1
+                                                    : project?.status === 1
                                                         ? (<small className='text-green-500'>Accepted</small>)
-                                                        : project?.status == 2
+                                                        : project?.status === 2
                                                             ? (<small className='text-gray-500'>Reverted</small>)
-                                                            : project?.status == 3
+                                                            : project?.status === 3
                                                                 ? (<small className='text-red-500'>Deleted</small>)
                                                                 : (
                                                                     <small className='text-orange-500'>Paid</small>
@@ -91,7 +91,7 @@ const ProjectDetails = ({ project }) => {
 
                             <div className="flex justify-start item-center space-x-2 mt-4">
 
-                                {project?.status == 0 && !isExpired ? (
+                                {project?.status === 0 && !isExpired ? (
                                     <button
                                         type='button'
                                         className='inline-block px-6 py-2.5
@@ -105,11 +105,11 @@ const ProjectDetails = ({ project }) => {
                                 ) : null}
 
                                 {/* 也就是當前操作者所使用的 wallet 要是 project owner 才能執行的相關操作 */}
-                                {connectedAccount == project?.owner
+                                {connectedAccount === project?.owner
                                     ? (
-                                        project?.status != 3  // 如果還沒有被刪掉
+                                        project?.status !== 3  // 如果還沒有被刪掉
                                             ? (
-                                                project?.status == 1 // 如果已經 APPROVED ( 達標 ) 
+                                                project?.status === 1 // 如果已經 APPROVED ( 達標 ) 
                                                     ? (
                                                         <button type='button' className='inline-block px-6 py-2.5
                                                 bg-orange-600 text-white font-medium text-xs leading-tight
@@ -120,7 +120,7 @@ const ProjectDetails = ({ project }) => {
                                                             Payout
                                                         </button>
                                                     )
-                                                    : project?.status != 4 // 如果還沒有達標且還沒有 PAIDOUT 就可以 Edit 和 delete
+                                                    : project?.status !== 4 // 如果還沒有達標且還沒有 PAIDOUT 就可以 Edit 和 delete
                                                         ? (
                                                             <>
                                                                 {!isExpired ? (

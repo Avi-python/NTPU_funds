@@ -9,10 +9,8 @@ const Project = ({ projects }) => {
   const [count] = useState(4);
   const [collection, setCollection] = useState([]);
 
-  const getCollection = () => projects.slice(0, end);
-
   useEffect(() => {
-    setCollection(getCollection());
+    setCollection(projects.slice(0, end));
   }, [projects, end]);
 
   return (
@@ -90,18 +88,18 @@ const ProjectCard = ({ project }) => {
           className="flex justify-between items-center flex-wrap 
           mt-4 mb-2 text-gray-500 font-bold"
         >
-          <small>{project.backers} Backer{project.backers == 1 ? '' : 's'}</small>
+          <small>{project.backers} Backer{project.backers === 1 ? '' : 's'}</small>
           <div>
             {
               isExpired ?
                 (<small className='text-red-500'>Expired</small>)
-                : project?.status == 0
+                : project?.status === 0
                   ? (<small className='text-gray-500'>Open</small>)
-                  : project?.status == 1
+                  : project?.status === 1
                     ? (<small className='text-green-500'>Accepted</small>)
-                    : project?.status == 2
+                    : project?.status === 2
                       ? (<small className='text-gray-500'>Reverted</small>)
-                      : project?.status == 3
+                      : project?.status === 3
                         ? (<small className='text-red-500'>Deleted</small>)
                         : (
                           <small className='text-orange-500'>Paid</small>

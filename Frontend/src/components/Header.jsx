@@ -8,18 +8,24 @@ const Header = () => {
   return (
     <header className="flex justify-between items-center  bg-white text-gray-50
     shadow-lg fixed top-0 left-0 right-0">
-      <Link
-        to="/"
-        className="flex justify-start items-center p-5">
-        <div className='font-extrabold space-x-1 text-3xl'>
-          <span className='text-blue-700'>N</span> 
-          <span className='text-emerald-700'>T</span>
-          <span className='text-yellow-400'>P</span>
-          <span className='text-red-700'>U</span>
+      <div className="flex justify-start items-center">
+        <Link
+          to="/"
+          className="flex justify-start items-center p-5">
+          <div className='font-extrabold space-x-1 text-3xl'>
+            <span className='text-blue-700'>N</span> 
+            <span className='text-emerald-700'>T</span>
+            <span className='text-yellow-400'>P</span>
+            <span className='text-red-700'>U</span>
+          </div>
+          <p className='text-black ml-5 text-xl'>Funds</p>
+          <TbBusinessplan />
+        </Link>
+
+        <div>
+          <Link to="/register" className="text-black">Register</Link>
         </div>
-        <p className='text-black ml-5 text-xl'>Funds</p>
-        <TbBusinessplan />
-      </Link>
+      </div>
 
       {/* <div className='flex justify-center items-stretch text-black'>
         <div className='bg-blue-700 w-20 h-20 m-0'></div>
