@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -28,8 +29,8 @@ DEBUG = True
 
 BLOCKCHAIN_URL = 'http://localhost:8545'
 
-ACCOUNT_PRIVATE_KEY = "e0d688abb8cf1ecc317e9e51fb50363be5a3b800b5e6900891d02dc87ded8c4d"
-ACCOUNT = "0xf318EDEe6c856606814C0DC3d971dceA82bF071c"
+ACCOUNT_PRIVATE_KEY = os.getenv("ACCOUNT_PRIVATE_KEY")
+ACCOUNT = os.getenv("ACCOUNT")
 
 ALLOWED_HOSTS = []
 
