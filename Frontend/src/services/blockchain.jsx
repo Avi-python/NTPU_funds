@@ -30,6 +30,9 @@ const isWallectConnected = async () => {
 
     window.ethereum.on('accountsChanged', async () => {
       setGlobalState('connectedAccount', accounts[0]?.toLowerCase());
+      localStorage.removeItem('authTokenAccess');
+      localStorage.removeItem('authTokenRefresh');
+      // 要將存這著的 token 刪掉
       await isWallectConnected();
     });
 
@@ -63,6 +66,7 @@ const getEtheriumContract = async () => {
   const contract = getGlobalState('contract');
 
   if (contract === null) {
+    console.log('Creating contract...');
     const provider = new ethers.providers.Web3Provider(ethereum);
     const signer = provider.getSigner();
     const contract = new ethers.Contract(contractAddress, contractAbi, signer);
@@ -70,7 +74,7 @@ const getEtheriumContract = async () => {
 
     return contract;
   } else {
-    return getGlobalState('contract');
+    return contract;
   }
 };
 
@@ -190,6 +194,24 @@ const getBackers = async (id) => {
   }
 };
 
+const isAppOwner = async (account) => {
+  try {
+    if(!ethereum) return alert('Please install Metamask');
+    const contract = await getEtheriumContract();
+
+    if(account === ""){
+      return false;
+    }
+
+    let result = await contract['isAppOwner(address)'](account);
+  
+    return result;
+
+  } catch (error) {
+    reportError(error)
+  }
+}
+
 const payoutProject = async (id) => {
   try {
     if (!ethereum) return alert('Please install Metamask');
@@ -263,6 +285,7 @@ export {
   deleteProject,
   backProject,
   getBackers,
+  isAppOwner,
   payoutProject,
   loadProjects,
   loadProject

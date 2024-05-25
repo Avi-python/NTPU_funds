@@ -1,10 +1,17 @@
 from django.shortcuts import render
 from django.http import JsonResponse, response, FileResponse
 from django.conf import settings
-from rest_framework.decorators import api_view, parser_classes
+
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, parser_classes, permission_classes
+from .permission import IsAppOwner
 from rest_framework.parsers import FormParser, MultiPartParser
 from .models import Applicant, ApplicantCertifiedDocs
-from utils.blockchain import get_address
+from utils.blockchain import getAddress
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializer import MyTokenObtainPairSerializer
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
 
 @api_view(['POST'])
 @parser_classes([FormParser, MultiPartParser])
@@ -14,7 +21,7 @@ def register(request):
 
     try:
 
-        address = get_address(data['message_hash'], data['signature'])
+        address = getAddress(data['message_hash'], data['signature'])
 
         applicant = Applicant.objects.create(
             name=data['name'],
@@ -34,3 +41,20 @@ def register(request):
         return JsonResponse({'error': "Register failed."}, status=400)
 
     return JsonResponse({'message': "Apply success. Wait for approval."}, status=200)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated, IsAppOwner])
+def applicants(request):
+    # do something
+
+    applicants = Applicant.objects.all()
+    data = []
+    for applicant in applicants:
+        data.append({
+            'name': applicant.name,
+            'email': applicant.email,
+            'address': applicant.address,
+            'certified_docs': [doc.image.url for doc in applicant.applicantcertifieddocs_set.all()]
+        })
+
+    return JsonResponse({'applicants': data}, status=200)

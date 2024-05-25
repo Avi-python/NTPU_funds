@@ -3,8 +3,11 @@ const fs = require('fs')
 
 async function main() {
   const taxFee = 5
+  
+  const [deployer] = await ethers.getSigners()
+
   const Contract = await ethers.getContractFactory("Genesis") // 抓取我們寫的合约
-  const contract = await Contract.deploy(taxFee) // 部署合约，而我的合約需要傳一個稅率參數進去
+  const contract = await Contract.connect(deployer).deploy(taxFee) // 部署合约，而我的合約需要傳一個稅率參數進去
 
   await contract.deployed()
 
@@ -16,6 +19,7 @@ async function main() {
       return
     }
     console.log('Deployed contract address', contract.address)
+    console.log('Contract owner is:', deployer.address)
   })
 }
 

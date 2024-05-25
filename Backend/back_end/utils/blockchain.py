@@ -19,11 +19,11 @@ except Exception as e:
 
 # 現在你可以讀取合約的狀態
 
-def get_address(messageHash, signature):
+def getAddress(messageHash, signature):
     # print('w3.eth.accounts', w3.eth.accounts)
     result = w3.eth.account.recover_message(encode_defunct(text=messageHash), signature=signature)
     print("result:", result)
     return result
 
-# def is_project_follower():
-#     return contract.functions.creator().call()
+def isAppOwner(address):
+    return contract.functions.isAppOwner(address).call()

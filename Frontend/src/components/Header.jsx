@@ -2,9 +2,21 @@ import { TbBusinessplan } from 'react-icons/tb'
 import { Link } from 'react-router-dom'
 import { connectWallet } from '../services/blockchain.jsx'
 import { useGlobalState, truncate } from '../store/index.jsx'
+import { isAppOwner } from '../services/blockchain.jsx'
+import { useEffect, useState } from 'react'
 
-const Header = () => {
+const Header = ({ loaded }) => {
   const [connectedAccount] = useGlobalState('connectedAccount');
+  const [is_app_owner, setIsAppOwner] = useState(false);
+  
+  useEffect(() => {
+    async function checkAppOwner() {
+      const result = await isAppOwner(connectedAccount);
+      setIsAppOwner(result);
+    } 
+    checkAppOwner();
+  }, [loaded, connectedAccount])
+ 
   return (
     <header className="flex justify-between items-center  bg-white text-gray-50
     shadow-lg fixed top-0 left-0 right-0">
@@ -22,9 +34,16 @@ const Header = () => {
           <TbBusinessplan />
         </Link>
 
-        <div>
+
+        <div className='space-x-3'>
           <Link to="/register" className="text-black">Register</Link>
+
+          {is_app_owner ? (
+            <Link to="/application" className="text-black">Application</Link>
+          ) : null
+          }
         </div>
+
       </div>
 
       {/* <div className='flex justify-center items-stretch text-black'>

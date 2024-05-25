@@ -1,6 +1,8 @@
 import { toast } from "react-toastify"
 import axios from 'axios'
 import { getSignature } from "../services/blockchain"
+import customAxios from '../utils/customAxios'    
+
 
 const serverURL = process.env.REACT_APP_SERVER_URL;
 
@@ -28,6 +30,39 @@ const register = async (form_data) => {
     }
 }
 
+const requestApplicants = async () => {
+    try{
+        const interceptor = customAxios();
+        const response = await interceptor.get(`${serverURL}/auth/applicants/`);
+        console.log(response.data);
+        return response.data;
+    } catch (error) {
+        toast.error('Failed to get applicants.');
+        throw error;
+    }
+}
+
+const requestLogin = async () => {
+    const { signature, msg_hash } = await getSignature(generateRandomString(10));
+    try {
+
+        const response = await axios.post(`${serverURL}/auth/token/`, {
+            message_hash: msg_hash,
+            signature: signature
+        });
+
+        console.log("requestLogin response: ", response.data);
+
+        localStorage.setItem('authTokenRefresh', response.data.refresh);
+        localStorage.setItem('authTokenAccess', response.data.access);
+
+    } catch (error) {
+        console.log(error);
+        toast.error('Failed to login.');
+    }
+
+}
+
 function generateRandomString(length) {
     let result = '';
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -40,4 +75,6 @@ function generateRandomString(length) {
 
 export {
     register,
+    requestApplicants,
+    requestLogin,
 };

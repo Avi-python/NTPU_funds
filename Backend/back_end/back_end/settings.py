@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,6 +27,9 @@ SECRET_KEY = 'django-insecure-+5tc=!6u+vdb2$zikug0cmwxb*)t9xpx!*q0vx=v!ujg=8%d$r
 DEBUG = True
 
 BLOCKCHAIN_URL = 'http://localhost:8545'
+
+ACCOUNT_PRIVATE_KEY = "e0d688abb8cf1ecc317e9e51fb50363be5a3b800b5e6900891d02dc87ded8c4d"
+ACCOUNT = "0xf318EDEe6c856606814C0DC3d971dceA82bF071c"
 
 ALLOWED_HOSTS = []
 
@@ -43,6 +47,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'app',
     'authentication',
+    'rest_framework_simplejwt',
 ]
 
 MIDDLEWARE = [
@@ -60,6 +65,45 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTStatelessUserAuthentication',
+    )
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=1), # 當登入的時候，server 會發這個令牌給 client，讓 client 有權訪問特定資源，如果過期就無法訪問。
+    'REFRESH_TOKEN_LIFETIME': timedelta(minutes=5), # 當 access token 過期，就會使用 refresh token 向 server 訪問要求新的 access token，如果 refresh token 沒過期則可以獲得，過期了使用者就要重新登入。
+    'ROTATE_REFRESH_TOKENS': True, # false 只更新 access token，這樣比較不安全。true 連同 refresh token 都一起更新，攻擊者無法使用舊的 refresh token。
+    'BLACKLIST_AFTER_ROTATION': True, # 讓舊的 access / refresh token 都無效，別人無法使用
+    'UPDATE_LAST_LOGIN': False,
+
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'VERIFYING_KEY': None,
+    'AUDIENCE': None,
+    'ISSUER': None,
+    'JWK_URL': None,
+    'LEEWAY': 0,
+
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'address',
+    'USER_AUTHENTICATION_RULE':  'rest_framework_simplejwt.authentication.default_user_authentication_rule',
+
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+    'TOKEN_USER_CLASS': 'rest_framework_simplejwt.models.TokenUser',
+    "TOKEN_OBTAIN_SERIALIZER": "my_app.serializers.MyTokenObtainPairSerializer",
+
+    'JTI_CLAIM': 'jti',
+
+    'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
+    'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+}
 
 ROOT_URLCONF = 'back_end.urls'
 

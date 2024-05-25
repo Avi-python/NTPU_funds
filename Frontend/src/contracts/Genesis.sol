@@ -250,4 +250,12 @@ contract Genesis {
         (bool success, ) = payable(to).call{value: amount}("");
         require(success);
     }
+
+    function isAppOwner(address addr) public view returns (bool) {
+        return addr == owner;
+    }
+    
+    function isAppOwner() public view returns (bool) {
+        return msg.sender == owner;
+    }
 }
