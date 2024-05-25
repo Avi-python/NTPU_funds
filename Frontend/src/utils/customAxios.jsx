@@ -14,8 +14,8 @@ const customAxios = () => {
 
     axiosInstance.interceptors.request.use(async req => {
 
-        console.log('in interceptors access token: ', localStorage.getItem('authTokenAccess'));
-        console.log('in interceptors refresh token: ', localStorage.getItem('authTokenRefresh'));
+        // console.log('in interceptors access token: ', localStorage.getItem('authTokenAccess'));
+        // console.log('in interceptors refresh token: ', localStorage.getItem('authTokenRefresh'));
 
         if(localStorage.getItem('authTokenAccess') === null) {
             return req;
@@ -30,7 +30,6 @@ const customAxios = () => {
         // payload.exp 的部分是 jwt的過期時間，如果這個過期時間超過了當前時間 dayjs 就會傳 true 代表 token 已經失效
         if (!isExpired) {
             req.headers.Authorization = `Bearer ${localStorage.getItem('authTokenAccess')}`; // 如果不加這個，就會一直使用上面過期的 token
-            console.log(req);
             return req;
         } else {
             await axios({
@@ -49,7 +48,6 @@ const customAxios = () => {
                 });
 
             req.headers.Authorization = `Bearer ${localStorage.getItem('authTokenAccess')}`;
-            console.log(req);
             return req;
         }
     });

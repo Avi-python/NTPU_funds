@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react'
 import { useState } from 'react'
 import { requestApplicants, requestLogin } from '../services/user'
+import Applicants from '../components/Applicants'
+import ApplicantDetails from '../components/ApplicantDetails'
 
 function Application() {
 
@@ -9,14 +11,14 @@ function Application() {
     useEffect(() => {
         async function getApplicants() {
             try {
-                const applicants = await requestApplicants();
-                setApplicants(applicants);
+                const res = await requestApplicants();
+                setApplicants(res.applicants);
             } catch (error) {
                 if(error.response.status === 401) {
                     try {
                         await requestLogin();
-                        const applicants = await requestApplicants();
-                        setApplicants(applicants);
+                        const res = await requestApplicants();
+                        setApplicants(res.applicants);
                         console.log("applicants:", applicants);
                     } catch (error) {
                         console.log(error);
@@ -47,19 +49,10 @@ function Application() {
     }
 
     return (
-        <div className="py-24 px-6 flex justify-start">
-            {
-                applicants.map((applicant, index) => {
-                    return (
-                        <div key={index} className="p-4 m-4 bg-gray-100 rounded-lg">
-                            <p className="text-lg font-bold">{applicant.name}</p>
-                            {/* <p className="text-sm">{applicant.}</p>
-                            <p className="text-sm">{applicant.phone}</p> */}
-                        </div>
-                    )
-                })
-            }
-        </div>
+        <>
+            <Applicants applicants={applicants} />
+            <ApplicantDetails />
+        </>
     )
 
 }

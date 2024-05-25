@@ -3,22 +3,29 @@ import { Link } from 'react-router-dom'
 import { connectWallet } from '../services/blockchain.jsx'
 import { useGlobalState, truncate } from '../store/index.jsx'
 import { isAppOwner } from '../services/blockchain.jsx'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
+import { setGlobalState } from '../store/index.jsx'
 
 const Header = ({ loaded }) => {
   const [connectedAccount] = useGlobalState('connectedAccount');
   const [is_app_owner, setIsAppOwner] = useState(false);
+  const headerRef = useRef(null);
   
   useEffect(() => {
     async function checkAppOwner() {
       const result = await isAppOwner(connectedAccount);
       setIsAppOwner(result);
     } 
+    function storeHeader(height) {
+        setGlobalState("headerHeight", height);
+    }
     checkAppOwner();
+    storeHeader(headerRef.current.offsetHeight);
+
   }, [loaded, connectedAccount])
  
   return (
-    <header className="flex justify-between items-center  bg-white text-gray-50
+    <header ref={headerRef} className="flex justify-between items-center  bg-white text-gray-50
     shadow-lg fixed top-0 left-0 right-0">
       <div className="flex justify-start items-center">
         <Link

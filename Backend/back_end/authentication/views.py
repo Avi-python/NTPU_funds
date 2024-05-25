@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import JsonResponse, response, FileResponse
+from django.http import JsonResponse, response, FileResponse, HttpResponse
 from django.conf import settings
 
 from rest_framework.permissions import IsAuthenticated
@@ -10,6 +10,9 @@ from .models import Applicant, ApplicantCertifiedDocs
 from utils.blockchain import getAddress
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializer import MyTokenObtainPairSerializer
+
+import os
+import base64
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
@@ -58,3 +61,21 @@ def applicants(request):
         })
 
     return JsonResponse({'applicants': data}, status=200)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated, IsAppOwner])
+def certified_doc(request):
+
+    image_path = request.data["doc_name"]
+    image_path = os.getcwd() + image_path 
+
+    # print("image_path: ", image_path);
+    # print("os.getcwd(): ", os.getcwd());
+
+    if not os.path.exists(image_path):
+        return JsonResponse({'error': 'Image not found'}, status=404)
+
+    with open(image_path, 'rb') as f:
+        base64image = base64.b64encode(f.read())
+
+    return HttpResponse(base64image, content_type='image/jpes');

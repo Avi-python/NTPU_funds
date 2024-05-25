@@ -42,6 +42,20 @@ const requestApplicants = async () => {
     }
 }
 
+const requestCertifiedDoc = async (doc_name) => {
+    try {
+        const interceptor = customAxios();
+        const response = await interceptor.post(`${serverURL}/auth/certified_doc/`, {
+            doc_name,
+        });
+
+        return response;
+
+    } catch (error) {
+        console.log("fail to request doc: ", error.message);
+    }
+}
+
 const requestLogin = async () => {
     const { signature, msg_hash } = await getSignature(generateRandomString(10));
     try {
@@ -76,5 +90,6 @@ function generateRandomString(length) {
 export {
     register,
     requestApplicants,
+    requestCertifiedDoc,
     requestLogin,
 };
