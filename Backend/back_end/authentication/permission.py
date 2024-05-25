@@ -1,5 +1,5 @@
 from rest_framework import permissions
-from web3 import Web3, HTTPProvider
+from utils.blockchain import isAppOwner
 
 class IsProjectCreator(permissions.BasePermission):
 
@@ -16,3 +16,11 @@ class IsProjectFollower(permissions.BasePermission):
 
         
         return
+
+class IsAppOwner(permissions.BasePermission):
+
+    def has_permission(self, request, view): # 確認是否是app的owner，才可以修改資料
+        
+        result = isAppOwner(request.user.address)
+        print("is app owner:", result)
+        return result

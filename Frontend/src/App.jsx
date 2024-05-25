@@ -4,6 +4,7 @@ import Header from "./components/Header"
 import Home from "./views/Home"
 import Project from "./views/Project"
 import Register from "./views/Register"
+import Application from "./views/Application"
 import { isWallectConnected } from "./services/blockchain"
 import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
@@ -32,13 +33,14 @@ const App = () => {
 
   return (
     <div className="min-h-screen relative">
-      <Header />
+      <Header loaded={loaded} />
 
       {loaded ? (
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/projects/:id" element={<Project />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/application" element={<Application />} />
         </Routes>
       ) : null}
 
