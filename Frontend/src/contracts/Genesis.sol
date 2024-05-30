@@ -12,7 +12,7 @@ contract Genesis {
     mapping(address => projectStruct[]) projectsOf; // 
     mapping(uint => backerStruct[]) backersOf; // input project id and return all backers of that project
     mapping(uint => bool) public projectExist;
-    mapping(address => bool) public isCreator;
+    mapping(address => bool) public CreatorExist;
 
     enum statusEnum {
         OPEN,
@@ -51,7 +51,7 @@ contract Genesis {
     }
 
     modifier creatorOnly() {
-        require(isCreator[msg.sender], "Creator reserved only");
+        require(CreatorExist[msg.sender], "Creator reserved only");
         _; // modifier 要加這個酷東西
     }
 
@@ -73,7 +73,7 @@ contract Genesis {
     }
 
     function addCreator(address _newCreator) public ownerOnly {
-        isCreator[_newCreator] = true;
+        CreatorExist[_newCreator] = true;
 
         emit Action(0, "CREATOR ADDED", msg.sender, block.timestamp);
     }
@@ -269,5 +269,9 @@ contract Genesis {
     
     function isAppOwner() public view returns (bool) {
         return msg.sender == owner;
+    }
+
+    function isCreator(address addr) public view returns (bool) {
+        return CreatorExist[addr];
     }
 }

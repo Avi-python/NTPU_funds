@@ -208,7 +208,24 @@ const isAppOwner = async (account) => {
     return result;
 
   } catch (error) {
-    reportError(error)
+    reportError(error);
+  }
+}
+
+const isCreator = async (account) => {
+  try {
+    if(!ethereum) return alert('Please install Metamask');
+    const contract = await getEtheriumContract();
+
+    if(account === ""){
+      return false;
+    }
+
+    let result = await contract['isCreator(address)'](account);
+
+    return result;
+  } catch (error) {
+    reportError(error);
   }
 }
 
@@ -286,6 +303,7 @@ export {
   backProject,
   getBackers,
   isAppOwner,
+  isCreator,
   payoutProject,
   loadProjects,
   loadProject

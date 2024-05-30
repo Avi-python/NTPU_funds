@@ -1,10 +1,23 @@
 import { setGlobalState, useGlobalState } from "../store"
+import { isCreator, isAppOwner } from "../services/blockchain"
+import { useEffect, useState } from "react";
 
 const Hero = () => {
 
     const [stats] = useGlobalState('stats');
+    const [connectedAccount] = useGlobalState('connectedAccount');
+    const [is_creator_or_owner, setIsCreatorOrOwner] = useState(false);
 
-    console.log(stats);
+    useEffect(() => {
+        async function checkCreator() {
+            const is_owner = await isAppOwner(connectedAccount);
+            const is_creator = await isCreator(connectedAccount);
+            setIsCreatorOrOwner(is_creator || is_owner);
+        }
+        checkCreator();
+    }, [connectedAccount]);
+
+    // console.log('is_creator: ', is_creator);
 
     return (
         <div className="text-center bg-white 
@@ -21,13 +34,16 @@ const Hero = () => {
                 {/* <span className="uppercase text-green-600">gensis.</span> */}
             </h1>
             <div className="flex justify-center item-center space-x-2">
-                <button type='button' className='inline-block px-6 py-2.5
-            bg-blue-500 text-white font-medium text-xs leading-tight
-            uppercase rounded-full shadow-md 
-            hover:bg-blue-900' onClick={() =>  setGlobalState("createModal", "scale-100")}
-                >
-                    Add Project
-                </button>
+            {is_creator_or_owner ? (
+                    <button type='button' className='inline-block px-6 py-2.5
+                    bg-blue-500 text-white font-medium text-xs leading-tight
+                    uppercase rounded-full shadow-md 
+                    hover:bg-blue-900' onClick={() => setGlobalState("createModal", "scale-100")}
+                    >
+                        Add Project
+                    </button>
+                ) : null 
+            }
 
                 <button type='button' className='inline-block px-6 py-2.5 border
             border-blue-500 font-medium text-xs leading-tight

@@ -20,6 +20,7 @@ const Home = () => {
       console.log('Loading projects done.');
       setLoaded(true);
     };
+    
     load();
 
   }, [])
