@@ -1,6 +1,7 @@
 import Identicon from "react-identicons"
 import { setGlobalState } from '../store/index';
 import { truncate } from "../store"
+import { rejectApplicant, approveApplicant } from '../services/user';
 
 const Applicants = ({ applicants }) => {
 
@@ -39,7 +40,7 @@ const Applicants = ({ applicants }) => {
                         </thead>
                         <tbody>
                             {applicants.map((applicant, i) => {
-                                return <Backer key={i} applicant={applicant} />
+                                return <Applicant key={i} applicant={applicant} />
                             })}
                         </tbody>
                     </table>
@@ -49,7 +50,7 @@ const Applicants = ({ applicants }) => {
     )
 }
 
-const Backer = ({ applicant }) => (
+const Applicant = ({ applicant }) => (
     <tr className="border-b border-gray-200">
 
         <td className="px-6 py-4">
@@ -104,7 +105,7 @@ const Backer = ({ applicant }) => (
                 bg-red-400 text-white font-medium text-xs leading-tight
                 uppercase rounded-full shadow-md 
                 hover:bg-red-700'
-                // onClick={() => setGlobalState("updateModal", "scale-100")}
+                onClick={() => rejectApplicant(applicant?.address)}
             >
                 Reject
             </button>
@@ -115,7 +116,7 @@ const Backer = ({ applicant }) => (
                 bg-green-400 text-white font-medium text-xs leading-tight
                 uppercase rounded-full shadow-md 
                 hover:bg-green-700'
-                // onClick={() => setGlobalState("updateModal", "scale-100")}
+                onClick={() => approveApplicant(applicant?.address)}
             >
                 Approve
             </button>

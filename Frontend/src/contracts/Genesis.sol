@@ -12,6 +12,7 @@ contract Genesis {
     mapping(address => projectStruct[]) projectsOf; // 
     mapping(uint => backerStruct[]) backersOf; // input project id and return all backers of that project
     mapping(uint => bool) public projectExist;
+    mapping(address => bool) public isCreator;
 
     enum statusEnum {
         OPEN,
@@ -49,6 +50,11 @@ contract Genesis {
         statusEnum status;
     }
 
+    modifier creatorOnly() {
+        require(isCreator[msg.sender], "Creator reserved only");
+        _; // modifier 要加這個酷東西
+    }
+
     modifier ownerOnly() {
         require(msg.sender == owner, "Owner reserved only");
         _; // modifier 要加這個酷東西
@@ -66,13 +72,19 @@ contract Genesis {
         projectTax = _projectTax;
     }
 
+    function addCreator(address _newCreator) public ownerOnly {
+        isCreator[_newCreator] = true;
+
+        emit Action(0, "CREATOR ADDED", msg.sender, block.timestamp);
+    }
+
     function createProject(
         string memory title,
         string memory description,
         string memory imageURL,
         uint cost,
         uint expiresAt
-    ) public returns (bool) {
+    ) public creatorOnly returns (bool) {
         require(bytes(title).length > 0, "Title cannot be empty");
         require(bytes(description).length > 0, "Description cannot be empty");
         require(bytes(imageURL).length > 0, "ImageURL cannot be empty");
@@ -106,7 +118,7 @@ contract Genesis {
         string memory description,
         string memory imageURL,
         uint expiresAt
-    ) public returns (bool) {
+    ) public creatorOnly returns (bool) {
         require(projectExist[id], "Project not found"); // 主播說下面那一行其實已經有確認 exist 的邏輯了，因此不需要這行
         require(msg.sender == projects[id].owner, "Unauthorized Entity");
         require(bytes(title).length > 0, "Title cannot be empty");
@@ -123,7 +135,7 @@ contract Genesis {
         return true;
     }
 
-    function deleteProject(uint id) public returns (bool) {
+    function deleteProject(uint id) public creatorOnly returns (bool) { // TODO : 如果 project approve 了，不能刪除
         require(projectExist[id], "Project not found"); // 主播說下面那一行其實已經有確認 exist 的邏輯了，因此不需要這行
         require(
             msg.sender == projects[id].owner, "Unauthorized Entity"

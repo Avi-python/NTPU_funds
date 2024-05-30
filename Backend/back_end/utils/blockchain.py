@@ -1,12 +1,16 @@
 from django.conf import settings
 from web3 import Web3, HTTPProvider
 from eth_account.messages import encode_defunct
+from django.conf import settings
+
 import json
+
 
 w3 = Web3(HTTPProvider(settings.BLOCKCHAIN_URL)) # 連接到blockchain
 contract_address = None
 contract_abi = None
 contract = None
+account = settings.ACCOUNT
 
 try:
     with open('../../frontend/src/abis/contractAddress.json') as json_file:
@@ -24,6 +28,11 @@ def getAddress(messageHash, signature):
     result = w3.eth.account.recover_message(encode_defunct(text=messageHash), signature=signature)
     print("result:", result)
     return result
+
+def addCreator(address):
+    print('owner account:', account)
+    print('new creator address:', address)
+    return contract.functions.addCreator(address).transact({'from': account})
 
 def isAppOwner(address):
     return contract.functions.isAppOwner(address).call()

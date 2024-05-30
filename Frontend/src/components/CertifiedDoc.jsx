@@ -19,12 +19,15 @@ function CertifiedDoc({ doc }) {
     }
 
   return (
+    <div className='m-3'>
       <img
           alt="not found"
           width={"250px"}
           src={`data:image/jpeg;base64,${image}`}
       />
+    </div>
   )
+
 }
 
 export default CertifiedDoc

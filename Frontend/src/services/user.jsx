@@ -77,6 +77,36 @@ const requestLogin = async () => {
 
 }
 
+const rejectApplicant = async (address) => {
+    try {
+        const interceptor = customAxios();
+        const response = await interceptor.post(`${serverURL}/auth/reject_applicant/`, {
+            address: address,
+        });
+
+        console.log(response.data);
+        toast.success('Reject successfully.');
+    } catch (error) {
+        console.log(error);
+        toast.error('Failed to reject.');
+    }
+}
+
+const approveApplicant = async (address) => {
+    try {
+        const interceptor = customAxios();
+        const response = await interceptor.post(`${serverURL}/auth/approve_applicant/`, {
+            address: address,
+        });
+
+        console.log(response.data);
+        toast.success('Approve successfully.');
+    } catch (error) {
+        console.log(error);
+        toast.error('Failed to approve.');
+    }
+}
+
 function generateRandomString(length) {
     let result = '';
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -92,4 +122,6 @@ export {
     requestApplicants,
     requestCertifiedDoc,
     requestLogin,
+    rejectApplicant,
+    approveApplicant,
 };

@@ -10,6 +10,7 @@ web3 = "*"
 django-cors-headers = "*"
 pillow = "*"
 djangorestframework-simplejwt = "*"
+python-dotenv = "*"
 
 [dev-packages]
 

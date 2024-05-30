@@ -7,7 +7,7 @@ from rest_framework.decorators import api_view, parser_classes, permission_class
 from .permission import IsAppOwner
 from rest_framework.parsers import FormParser, MultiPartParser
 from .models import Applicant, ApplicantCertifiedDocs
-from utils.blockchain import getAddress
+from utils.blockchain import getAddress, addCreator
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializer import MyTokenObtainPairSerializer
 
@@ -79,3 +79,39 @@ def certified_doc(request):
         base64image = base64.b64encode(f.read())
 
     return HttpResponse(base64image, content_type='image/jpes');
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated, IsAppOwner])
+def reject_applicant(request):
+
+    data = request.data
+    address = data['address']
+
+    try:
+        applicant = Applicant.objects.get(address=address)
+        applicant.delete()
+    except Exception as e:
+        print("Reject Error: ", e)
+        return JsonResponse({'error': "Reject failed."}, status=400)
+    
+    return JsonResponse({'message': "Reject success."}, status=200)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated, IsAppOwner])
+def approve_applicant(request):
+
+    data = request.data
+    address = data['address']
+
+    try:
+        addCreator(address)
+        applicant = Applicant.objects.get(address=address)
+        applicant.delete()
+    except Exception as e:
+        print("Approve Error: ", e)
+        return JsonResponse({'error': "Approve failed."}, status=400)
+    
+    return JsonResponse({'message': "Approve success."}, status=200)
+
+    

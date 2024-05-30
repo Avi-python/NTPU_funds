@@ -8,4 +8,6 @@ urlpatterns = [
       path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
       path('applicants/', views.applicants),
       path('certified_doc/', views.certified_doc),
+      path('reject_applicant/', views.reject_applicant),
+      path('approve_applicant/', views.approve_applicant),
 ]

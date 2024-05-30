@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "D:\\College_things\\3_grade_2\\Blockchain\\Project\\NTPU_Funds\\frontend\\src\\contracts\\Genesis.sol": {
-      "lastModificationDate": 1716572523924,
-      "contentHash": "c549681794d155571bb6298eb0916431",
+      "lastModificationDate": 1717086997356,
+      "contentHash": "88ec48bd2f832b53b8889760fe1d1211",
       "sourceName": "src/contracts/Genesis.sol",
       "solcConfig": {
         "version": "0.8.11",
