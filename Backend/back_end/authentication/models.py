@@ -1,4 +1,6 @@
 from django.db import models
+from django.dispatch import receiver
+from django.db.models.signals import post_delete
 
 # Create your models here.
 
@@ -23,3 +25,7 @@ class ApplicantCertifiedDocs(models.Model):
     
     def __str__(self):
         return self.applicant.name
+    
+@receiver(post_delete, sender=ApplicantCertifiedDocs)
+def submission_delete(sender, instance, **kwargs):
+    instance.image.delete(False)
