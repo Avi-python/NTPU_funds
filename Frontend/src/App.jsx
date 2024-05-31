@@ -4,6 +4,7 @@ import Header from "./components/Header"
 import Home from "./views/Home"
 import Project from "./views/Project"
 import Register from "./views/Register"
+import Follow from "./views/Follow"
 import Application from "./views/Application"
 import { isWallectConnected } from "./services/blockchain"
 import { ToastContainer } from "react-toastify"
@@ -41,6 +42,7 @@ const App = () => {
           <Route path="/projects/:id" element={<Project />} />
           <Route path="/register" element={<Register />} />
           <Route path="/application" element={<Application />} />
+          <Route path="/follow" element={<Follow />} />
         </Routes>
       ) : null}
 

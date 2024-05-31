@@ -91,19 +91,22 @@ const ProjectCard = ({ project }) => {
           <small>{project.backers} Backer{project.backers === 1 ? '' : 's'}</small>
           <div>
             {
-              isExpired ?
+              isExpired ? // TODO : 要調整一下，過期是否要將錢退給 backers，從而變成 Reverted。
                 (<small className='text-red-500'>Expired</small>)
                 : project?.status === 0
                   ? (<small className='text-gray-500'>Open</small>)
                   : project?.status === 1
-                    ? (<small className='text-green-500'>Accepted</small>)
+                    ? (<small className='text-green-500'>Approved</small>)
                     : project?.status === 2
                       ? (<small className='text-gray-500'>Reverted</small>)
                       : project?.status === 3
                         ? (<small className='text-red-500'>Deleted</small>)
-                        : (
-                          <small className='text-orange-500'>Paid</small>
-                        )
+                        : project?.status === 4
+                          ? (<small className='text-blue-500'>Progressing</small>)
+                          :
+                          (
+                            <small className='text-orange-500'>Paid</small>
+                          )
             }
           </div>
         </div>

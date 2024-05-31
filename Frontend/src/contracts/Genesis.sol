@@ -1,11 +1,14 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.7;
+pragma solidity ^0.8.26;
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
-contract Genesis {
+contract Genesis is ERC721, ERC721URIStorage {
     address public owner;
     uint public projectTax; // 稅，owner 要吃的稅 per project
     uint public projectCount;
     uint public balance; // 合約內的餘額
+    uint public tokenCounter;
     statsStruct public stats;
     projectStruct[] projects;
 
@@ -13,13 +16,16 @@ contract Genesis {
     mapping(uint => backerStruct[]) backersOf; // input project id and return all backers of that project
     mapping(uint => bool) public projectExist;
     mapping(address => bool) public CreatorExist;
+    mapping(uint => uint[]) public projectOfNFTs;
+    mapping(address => uint[]) public UserOfNFTs;
 
     enum statusEnum {
         OPEN,
         APPROVED, // 代表達標
         REVERTED,
         DELETED,
-        PAIDOUT
+        PROGRESSING, // 正在進行這項計畫中
+        PAIDOUT // 錢都繳出去了
     }
 
     struct statsStruct {
@@ -50,8 +56,8 @@ contract Genesis {
         statusEnum status;
     }
 
-    modifier creatorOnly() {
-        require(CreatorExist[msg.sender], "Creator reserved only");
+    modifier creatorOrOwnerOnly() { // TODO : 這個權限可能有待調整
+       require(CreatorExist[msg.sender] || msg.sender == owner, "Creator Or Owner reserved only");
         _; // modifier 要加這個酷東西
     }
 
@@ -67,9 +73,53 @@ contract Genesis {
         uint256 timestamp
     );
 
-    constructor(uint _projectTax) {
+    constructor(uint _projectTax) ERC721("NtpuFund", "NTPU") {
+        tokenCounter = 0;
         owner = msg.sender;
         projectTax = _projectTax;
+    }
+
+    function _createCollectible(address to, string memory uri) internal returns (uint) {
+        uint _tokenId = tokenCounter;
+        _safeMint(to, _tokenId);
+        _setTokenURI(_tokenId, uri);
+        tokenCounter += 1;
+        return _tokenId;
+    }
+
+    function projectMint(uint id) internal {
+        require(projectExist[id], "Project not found");
+        require(projects[id].status == statusEnum.APPROVED, "Project is not approved yet");
+
+        backerStruct[] memory backers = backersOf[id];
+
+        for(uint i = 0; i < backers.length; i++){
+            address _owner = backers[i].owner;
+            string memory _uri = string(abi.encodePacked('{"title": "', projects[id].title, '", "imageURL": "', projects[id].imageURL, '"}')); // TODO : 不知道這行是不是對的
+            uint tokenId = _createCollectible(_owner, _uri  );
+            projectOfNFTs[id].push(tokenId);
+            UserOfNFTs[_owner].push(tokenId);
+        }
+        
+        emit Action(id, "NFTs MINTED", msg.sender, block.timestamp);
+    }
+
+    function tokenURI(uint256 tokenId)
+        public
+        view
+        override(ERC721, ERC721URIStorage)
+        returns (string memory)
+    {
+        return super.tokenURI(tokenId);
+    }
+
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(ERC721, ERC721URIStorage)
+        returns (bool)
+    {
+        return super.supportsInterface(interfaceId);
     }
 
     function addCreator(address _newCreator) public ownerOnly {
@@ -84,7 +134,7 @@ contract Genesis {
         string memory imageURL,
         uint cost,
         uint expiresAt
-    ) public creatorOnly returns (bool) {
+    ) public creatorOrOwnerOnly returns (bool) {
         require(bytes(title).length > 0, "Title cannot be empty");
         require(bytes(description).length > 0, "Description cannot be empty");
         require(bytes(imageURL).length > 0, "ImageURL cannot be empty");
@@ -118,7 +168,7 @@ contract Genesis {
         string memory description,
         string memory imageURL,
         uint expiresAt
-    ) public creatorOnly returns (bool) {
+    ) public creatorOrOwnerOnly returns (bool) {
         require(projectExist[id], "Project not found"); // 主播說下面那一行其實已經有確認 exist 的邏輯了，因此不需要這行
         require(msg.sender == projects[id].owner, "Unauthorized Entity");
         require(bytes(title).length > 0, "Title cannot be empty");
@@ -135,7 +185,7 @@ contract Genesis {
         return true;
     }
 
-    function deleteProject(uint id) public creatorOnly returns (bool) { // TODO : 如果 project approve 了，不能刪除
+    function deleteProject(uint id) public creatorOrOwnerOnly returns (bool) { // TODO : 如果 project approve 了，不能刪除
         require(projectExist[id], "Project not found"); // 主播說下面那一行其實已經有確認 exist 的邏輯了，因此不需要這行
         require(
             msg.sender == projects[id].owner, "Unauthorized Entity"
@@ -185,8 +235,6 @@ contract Genesis {
     
         if(projects[id].raised >= projects[id].cost){
             projects[id].status = statusEnum.APPROVED;
-            balance += projects[id].raised;
-            performPayout(id);
             return true;
         }
             
@@ -226,7 +274,7 @@ contract Genesis {
     }
 
     function payOutProject(uint id) public returns (bool){ // owner 主動執行 payout
-        require(projects[id].status == statusEnum.APPROVED, "Project is not approved yet");
+        require(projects[id].status == statusEnum.APPROVED, "Project is not approved yet"); //TODO : 狀態要改，因為現在不是達標就直接匯錢
         require(
             msg.sender == projects[id].owner || 
             msg.sender == owner, 
@@ -234,6 +282,21 @@ contract Genesis {
         );
 
         performPayout(id);
+        return true;
+    }
+
+    function startProject(uint id) public creatorOrOwnerOnly returns (bool) {
+        require(projectExist[id], "Project not found");
+        require(projects[id].status == statusEnum.APPROVED, "Project is not approved yet");
+        require(
+            msg.sender == projects[id].owner || 
+            msg.sender == owner,  // TODO : 暫時先讓 app owner 也可以 start project
+            "Unauthorized Entity"
+        );
+        
+        projectMint(id);
+        projects[id].status = statusEnum.PROGRESSING;
+
         return true;
     }
 
@@ -255,6 +318,19 @@ contract Genesis {
         require(projectExist[id], "Project not found");
 
         return backersOf[id];
+    }
+
+    function getNfts(address _owner) public view returns (string[] memory) {
+        require(UserOfNFTs[_owner].length >= 0, "No NFTs found");
+
+        uint length = UserOfNFTs[_owner].length;
+        string[] memory nfts = new string[](length);
+
+        for(uint i = 0; i < UserOfNFTs[_owner].length; i++){
+            nfts[i] = tokenURI(UserOfNFTs[_owner][i]);
+        }
+
+        return nfts;
     }
     
 

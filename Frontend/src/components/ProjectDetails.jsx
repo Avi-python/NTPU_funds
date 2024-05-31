@@ -2,7 +2,7 @@ import Identicon from "react-identicons"
 import { FaEthereum } from "react-icons/fa"
 import { setGlobalState, useGlobalState } from "../store"
 import { daysRemaining, truncate } from "../store"
-import { payoutProject } from "../services/blockchain"
+import { payoutProject, startProject } from "../services/blockchain"
 
 const ProjectDetails = ({ project }) => {
     const [connectedAccount] = useGlobalState('connectedAccount');
@@ -53,12 +53,15 @@ const ProjectDetails = ({ project }) => {
                                                 : project?.status === 0
                                                     ? (<small className='text-gray-500'>Open</small>)
                                                     : project?.status === 1
-                                                        ? (<small className='text-green-500'>Accepted</small>)
+                                                        ? (<small className='text-green-500'>Approved</small>)
                                                         : project?.status === 2
                                                             ? (<small className='text-gray-500'>Reverted</small>)
                                                             : project?.status === 3
                                                                 ? (<small className='text-red-500'>Deleted</small>)
-                                                                : (
+                                                                : project?.status === 4
+                                                                ? (<small className='text-blue-500'>Progressing</small>)
+                                                                : 
+                                                                (
                                                                     <small className='text-orange-500'>Paid</small>
                                                                 )
                                         }
@@ -112,12 +115,12 @@ const ProjectDetails = ({ project }) => {
                                                 project?.status === 1 // 如果已經 APPROVED ( 達標 ) 
                                                     ? (
                                                         <button type='button' className='inline-block px-6 py-2.5
-                                                bg-orange-600 text-white font-medium text-xs leading-tight
+                                                bg-blue-500 text-white font-medium text-xs leading-tight
                                                 uppercase rounded-full shadow-md 
-                                                hover:bg-orange-700'
-                                                            onClick={() => payoutProject(project?.id)}
+                                                hover:bg-blue-700'
+                                                            onClick={() => startProject(project?.id)}
                                                         >
-                                                            Payout
+                                                            Start
                                                         </button>
                                                     )
                                                     : project?.status !== 4 // 如果還沒有達標且還沒有 PAIDOUT 就可以 Edit 和 delete

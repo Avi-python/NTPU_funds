@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-+5tc=!6u+vdb2$zikug0cmwxb*)t9xpx!*q0vx=v!ujg=8%d$r
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-BLOCKCHAIN_URL = 'http://localhost:8545'
+BLOCKCHAIN_URL = 'http://localhost:9545'
 
 ACCOUNT_PRIVATE_KEY = os.getenv("ACCOUNT_PRIVATE_KEY")
 ACCOUNT = os.getenv("ACCOUNT")
@@ -72,7 +72,7 @@ CORS_ALLOWED_ORIGINS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTStatelessUserAuthentication',
+        'rest_framework_simplejwt.authentication.JWTStatelessUserAuthentication', # Stateless User 讓我可以用我想要方式登入
     )
 }
 

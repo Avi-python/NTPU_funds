@@ -7,12 +7,12 @@ module.exports = {
   defaultNetwork: 'localhost',
   networks: {
     localhost: {
-      url: 'http://127.0.0.1:8545',
+      url: 'http://127.0.0.1:9545',
       accounts: ["0x" + process.env.APP_OWNER_PRIVATE_KEY]
     },
   },
   solidity: {
-    version: '0.8.11',
+    version: '0.8.26',
     settings: {
       optimizer: {
         enabled: true,

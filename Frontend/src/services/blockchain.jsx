@@ -128,6 +128,40 @@ const deleteProject = async (id) => {
   }
 }
 
+const payoutProject = async (id) => {
+  try {
+    if (!ethereum) return alert('Please install Metamask');
+    const connectedAccount = getGlobalState('connectedAccount');
+    const contract = await getEtheriumContract();
+
+    await contract.payOutProject(id, {
+      from: connectedAccount, // msg.sender
+    });
+
+    // await tx.wait()
+    // await getBackers(id)
+  } catch (error) {
+    reportError(error)
+  }
+};
+
+const startProject = async (id) => {
+  try {
+    if (!ethereum) return alert('Please install Metamask');
+    const connectedAccount = getGlobalState('connectedAccount');
+    const contract = await getEtheriumContract();
+
+    await contract.startProject(id, {
+      from: connectedAccount, // msg.sender
+    });
+
+    // await tx.wait()
+    // await getBackers(id)
+  } catch (error) {
+    reportError(error)
+  }
+}
+
 const loadProjects = async () => {
   try {
     if (!ethereum) return alert('Please install Metamask');
@@ -194,6 +228,26 @@ const getBackers = async (id) => {
   }
 };
 
+const getNFTs = async (address) => {
+
+  try {
+    if (!ethereum) return alert('Please install Metamask');
+
+    const contract = await getEtheriumContract();
+    let result = await contract.getNfts(address);
+    let nfts = [];
+
+    for(let i = 0; i < result.length; i++){
+      nfts.push(JSON.parse(result[i]));
+    }
+
+    return nfts;
+  } catch (error) {
+    reportError(error);
+  }
+
+}
+
 const isAppOwner = async (account) => {
   try {
     if(!ethereum) return alert('Please install Metamask');
@@ -229,22 +283,6 @@ const isCreator = async (account) => {
   }
 }
 
-const payoutProject = async (id) => {
-  try {
-    if (!ethereum) return alert('Please install Metamask');
-    const connectedAccount = getGlobalState('connectedAccount');
-    const contract = await getEtheriumContract();
-
-    await contract.payOutProject(id, {
-      from: connectedAccount, // msg.sender
-    });
-
-    // await tx.wait()
-    // await getBackers(id)
-  } catch (error) {
-    reportError(error)
-  }
-};
 
 const structuredBackers = (backers) =>
   backers.map((backer) => ({
@@ -301,10 +339,12 @@ export {
   updateProject,
   deleteProject,
   backProject,
+  payoutProject,
+  startProject,
   getBackers,
+  getNFTs,
   isAppOwner,
   isCreator,
-  payoutProject,
   loadProjects,
   loadProject
 };

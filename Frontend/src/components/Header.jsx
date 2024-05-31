@@ -27,7 +27,7 @@ const Header = ({ loaded }) => {
   return (
     <header ref={headerRef} className="flex justify-between items-center  bg-white text-gray-50
     shadow-lg fixed top-0 left-0 right-0">
-      <div className="flex justify-start items-center">
+      <div className="flex justify-start items-center space-x-3">
         <Link
           to="/"
           className="flex justify-start items-center p-5">
@@ -42,15 +42,15 @@ const Header = ({ loaded }) => {
         </Link>
 
 
-        <div className='space-x-3'>
           <Link to="/register" className="text-black">Register</Link>
+
+          <Link to="/follow" className="text-black">NFTs</Link>
+      
 
           {is_app_owner ? (
             <Link to="/application" className="text-black">Application</Link>
           ) : null
           }
-        </div>
-
       </div>
 
       {/* <div className='flex justify-center items-stretch text-black'>
