@@ -6,6 +6,8 @@ import Project from "./views/Project"
 import Register from "./views/Register"
 import Follow from "./views/Follow"
 import Application from "./views/Application"
+import MyProjects from "./views/MyProjects"
+import ProgressingProject from "./views/ProgressingProject"
 import { isWallectConnected } from "./services/blockchain"
 import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
@@ -43,6 +45,8 @@ const App = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/application" element={<Application />} />
           <Route path="/follow" element={<Follow />} />
+          <Route path="/my-projects" element={<MyProjects />} />
+          <Route path="/progressing_project/:id" element={<ProgressingProject />} />
         </Routes>
       ) : null}
 

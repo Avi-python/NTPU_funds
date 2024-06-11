@@ -350,4 +350,9 @@ contract Genesis is ERC721, ERC721URIStorage {
     function isCreator(address addr) public view returns (bool) {
         return CreatorExist[addr];
     }
+
+    function isProjectCreator(uint id, address addr) public view returns (bool) {
+        require(projectExist[id], "Project not found");
+        return projects[id].owner == addr; // 因為 id 剛好等於 project's index
+    }
 }

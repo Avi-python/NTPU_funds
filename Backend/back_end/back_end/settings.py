@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'app',
     'authentication',
+    'project',
     'rest_framework_simplejwt',
 ]
 

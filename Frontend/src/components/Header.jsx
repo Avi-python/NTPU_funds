@@ -51,6 +51,9 @@ const Header = ({ loaded }) => {
             <Link to="/application" className="text-black">Application</Link>
           ) : null
           }
+
+          <Link to="/my-projects" className="text-black">MyProjects</Link>
+
       </div>
 
       {/* <div className='flex justify-center items-stretch text-black'>

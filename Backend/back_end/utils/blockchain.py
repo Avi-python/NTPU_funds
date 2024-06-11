@@ -36,3 +36,15 @@ def addCreator(address):
 
 def isAppOwner(address):
     return contract.functions.isAppOwner(address).call()
+
+def isProjectCreator(projectId, address):
+    return contract.functions.isProjectCreator(projectId, address).call()
+
+def isProjectFollower(projectId, address):
+    result = contract.functions.getBackers(projectId).call()
+
+    for unit in result:
+        if unit[0] == address:
+            return True
+
+    return False
