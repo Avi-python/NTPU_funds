@@ -33,7 +33,7 @@ function ProgressingProject() {
             }
         }
         getProgress();
-    }, []);
+    }, [id]);
 
     if (progress === null) {
         return (
@@ -45,7 +45,7 @@ function ProgressingProject() {
 
     return (
         <>
-            <ProgressCells progress={progress} />
+            <ProgressCells projectId={id} progress={progress} />
             <CreateProgressCell projectId={id} />
             <ProgressCellDetails projectId={id} />
         </>

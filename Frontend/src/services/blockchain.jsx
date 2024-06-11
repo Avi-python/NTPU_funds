@@ -275,7 +275,25 @@ const isCreator = async (account) => {
       return false;
     }
 
-    let result = await contract['isCreator(address)'](account);
+    let result = await contract.isCreator(account);
+
+
+    return result;
+  } catch (error) {
+    reportError(error);
+  }
+}
+
+const isProjectCreator = async (projectId, account) => {
+  try {
+    if(!ethereum) return alert('Please install Metamask');
+    const contract = await getEtheriumContract();
+
+    if(account === ""){
+      return false;
+    }
+
+    let result = await contract.isProjectCreator(projectId, account);
 
     return result;
   } catch (error) {
@@ -345,6 +363,7 @@ export {
   getNFTs,
   isAppOwner,
   isCreator,
+  isProjectCreator,
   loadProjects,
   loadProject
 };

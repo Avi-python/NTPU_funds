@@ -1,10 +1,25 @@
-import { setGlobalState } from "../store";
+import { useState, useEffect } from "react";
+import { isProjectCreator } from "../services/blockchain";
+import { getGlobalState, setGlobalState } from "../store";
 
-function ProgressingProjectDetails({ progress }) {
+function ProgressingProjectDetails({ projectId, progress }) {
+
+  const account = getGlobalState("connectedAccount");
+  const [creatorBool, setCreatorBool]  = useState(false);
+
+  useEffect(() => {
+    async function checkCreator() {
+      setCreatorBool(await isProjectCreator(projectId, account));
+    }
+    checkCreator();
+  }, [account, projectId, progress]);
+
+  console.log("creatorBool:", creatorBool);
 
   return (
     <div className="py-24 px-6 flex flex-col justify-center">
-
+      
+      { creatorBool ?
       <div className="flex justify-center item-center space-x-2 mb-5">
         <button type='button' className='inline-block px-6 py-2.5
                     bg-blue-500 text-white font-medium text-xs leading-tight
@@ -14,7 +29,7 @@ function ProgressingProjectDetails({ progress }) {
         >
           New Process Cell
         </button>
-      </div>
+      </div> : null }
 
       <div className="flex flex-col justify-center items-start w-full md:w-2/3 px-6 mx-auto">
         <div className="max-h-[calc(100vh_-_25rem)] overflow-y-auto shadow-md rounded-md w-full mb-10">

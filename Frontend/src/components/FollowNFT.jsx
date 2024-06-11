@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useGlobalState } from '../store'
-import { getNFTs } from '../services/blockchain'
+import { getNFTs} from '../services/blockchain'
+import { Link } from 'react-router-dom';
 
 function FollowNFT() {
 
@@ -53,15 +54,17 @@ const NFTCard = ({ nft }) => {
   // const isExpired = new Date().getTime() > Number(project?.expiresAt + '000');
 
   return <div id="nft" className="shadow-lg bg-yellow-200 w-64 sm:w-80 m-4" style={{borderTopLeftRadius: '9999px', borderTopRightRadius: '9999px'}}>
-      <img
-        src={nft.imageURL}
-        alt={nft.title}
-        className="rounded-full shadow-md h-64 sm:h-80 w-full object-cover"
-      />
+      <Link to={`/progressing_project/${nft.id}`}>
+        <img
+          src={nft.imageURL}
+          alt={nft.title}
+          className="rounded-full shadow-md h-64 sm:h-80 w-full object-cover"
+        />
 
-      <div className="p-4">
-        <h5>{nft.title}</h5>
-      </div>
+        <div className="p-4">
+          <h5>{nft.title}</h5>
+        </div>
+      </Link>
   </div>
 }
 

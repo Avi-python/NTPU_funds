@@ -2,6 +2,7 @@
 pragma solidity ^0.8.26;
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract Genesis is ERC721, ERC721URIStorage {
     address public owner;
@@ -95,7 +96,7 @@ contract Genesis is ERC721, ERC721URIStorage {
 
         for(uint i = 0; i < backers.length; i++){
             address _owner = backers[i].owner;
-            string memory _uri = string(abi.encodePacked('{"title": "', projects[id].title, '", "imageURL": "', projects[id].imageURL, '"}')); // TODO : 不知道這行是不是對的
+            string memory _uri = string(abi.encodePacked('{"id": "', Strings.toString(id),'", "title": "', projects[id].title, '", "imageURL": "', projects[id].imageURL, '"}')); // TODO : 不知道這行是不是對的
             uint tokenId = _createCollectible(_owner, _uri  );
             projectOfNFTs[id].push(tokenId);
             UserOfNFTs[_owner].push(tokenId);
