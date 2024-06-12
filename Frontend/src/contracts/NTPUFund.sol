@@ -4,7 +4,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
-contract Genesis is ERC721, ERC721URIStorage {
+contract NTPUFund is ERC721, ERC721URIStorage {
     address public owner;
     uint public projectTax; // 稅，owner 要吃的稅 per project
     uint public projectCount;

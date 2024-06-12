@@ -13,9 +13,9 @@ contract = None
 account = settings.ACCOUNT
 
 try:
-    with open('../../frontend/src/abis/contractAddress.json') as json_file:
+    with open('../../frontend/src/abis/NTPUFundContractAddress.json') as json_file:
         contract_address = json.load(json_file)["address"]
-    with open("../../frontend/src/abis/src/contracts/Genesis.sol/Genesis.json") as abi_file:
+    with open("../../frontend/src/abis/src/contracts/NTPUFund.sol/NTPUFund.json") as abi_file:
         contract_abi = json.load(abi_file)["abi"]
     contract = w3.eth.contract(address=contract_address, abi=contract_abi)
 except Exception as e:

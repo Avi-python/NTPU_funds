@@ -6,20 +6,34 @@ async function main() {
   
   const [deployer] = await ethers.getSigners()
 
-  const Contract = await ethers.getContractFactory("Genesis") // 抓取我們寫的合约
-  const contract = await Contract.connect(deployer).deploy(taxFee) // 部署合约，而我的合約需要傳一個稅率參數進去
+  const NTPUFundContract = await ethers.getContractFactory("NTPUFund") // 抓取我們寫的合约
+  const ntpuFund_contract = await NTPUFundContract.connect(deployer).deploy(taxFee) // 部署合约，而我的合約需要傳一個稅率參數進去
 
-  await contract.deployed()
+  const NTPUVoteContract = await ethers.getContractFactory("NTPUVote")
+  const ntpuVote_contract = await NTPUVoteContract.connect(deployer).deploy()
+
+  await ntpuFund_contract.deployed()
+  await ntpuVote_contract.deployed()
 
   // 把合约地址寫進一個json檔案
-  const address = JSON.stringify({ address: contract.address }, null, 4) 
-  fs.writeFile('./src/abis/contractAddress.json', address, 'utf8', (err) => {
+  const ntpuFund_address = JSON.stringify({ address: ntpuFund_contract.address }, null, 4) 
+  fs.writeFile('./src/abis/NTPUFundContractAddress.json', ntpuFund_address, 'utf8', (err) => {
     if (err) {
       console.error(err)
       return
     }
-    console.log('Deployed contract address', contract.address)
-    console.log('Contract owner is:', deployer.address)
+    console.log('Deployed NTPUFund contract address', ntpuFund_contract.address)
+    console.log('NTPUFund Contract owner is:', deployer.address)
+  })
+
+  const ntpuVote_address = JSON.stringify({ address: ntpuVote_contract.address }, null, 4)
+  fs.writeFile('./src/abis/NTPUVoteContractAddress.json', ntpuVote_address, 'utf8', (err) => {
+    if (err) {
+      console.error(err)
+      return
+    }
+    console.log('Deployed NTPUVote contract address', ntpuVote_contract.address)
+    console.log('NTPUVote Contract owner is:', deployer.address)
   })
 }
 

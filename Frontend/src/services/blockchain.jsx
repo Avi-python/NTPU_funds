@@ -1,12 +1,12 @@
-import abi from '../abis/src/contracts/Genesis.sol/Genesis.json';
-import address from '../abis/contractAddress.json';
+import NTPUFundabi from '../abis/src/contracts/NTPUFund.sol/NTPUFund.json';
+import ntpuFund_address from '../abis/NTPUFundContractAddress.json';
 import { getGlobalState, setGlobalState } from '../store';
 import { ethers } from 'ethers';
 
 
 const { ethereum } = window;
-const contractAddress = address.address;
-const contractAbi = abi.abi;
+const NTPUFundContractAddress = ntpuFund_address.address;
+const NTPUFundContractAbi = NTPUFundabi.abi;
 
 const connectWallet = async () => {
   try {
@@ -69,7 +69,7 @@ const getEtheriumContract = async () => {
     console.log('Creating contract...');
     const provider = new ethers.providers.Web3Provider(ethereum);
     const signer = provider.getSigner();
-    const contract = new ethers.Contract(contractAddress, contractAbi, signer);
+    const contract = new ethers.Contract(NTPUFundContractAddress, NTPUFundContractAbi, signer);
     setGlobalState('contract', contract);
 
     return contract;
