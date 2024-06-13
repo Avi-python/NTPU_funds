@@ -32,7 +32,11 @@ def getAddress(messageHash, signature):
 def addCreator(address):
     print('owner account:', account)
     print('new creator address:', address)
-    return contract.functions.addCreator(address).transact({'from': account})
+    tx_hash = contract.functions.addCreator(address).transact({'from': account})
+    print("addCreator tx_hash : ", tx_hash)
+    receipt = w3.eth.wait_for_transaction_receipt(tx_hash) # 等待交易完成
+    return receipt
+
 
 def isAppOwner(address):
     return contract.functions.isAppOwner(address).call()

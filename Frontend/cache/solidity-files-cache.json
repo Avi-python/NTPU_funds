@@ -569,8 +569,8 @@
       "artifacts": []
     },
     "D:\\College_things\\3_grade_2\\Blockchain\\Project\\NTPU_Funds\\frontend\\src\\contracts\\NTPUVote.sol": {
-      "lastModificationDate": 1718089403859,
-      "contentHash": "5e52e7b4d80dfbdea807622c6800cc7f",
+      "lastModificationDate": 1718225640159,
+      "contentHash": "6e5039cabd8b947979a2f5fa35ed0fc2",
       "sourceName": "src/contracts/NTPUVote.sol",
       "solcConfig": {
         "version": "0.8.26",
@@ -601,12 +601,13 @@
         "^0.8.26"
       ],
       "artifacts": [
+        "NTPUFundInterface",
         "NTPUVote"
       ]
     },
     "D:\\College_things\\3_grade_2\\Blockchain\\Project\\NTPU_Funds\\frontend\\src\\contracts\\NTPUFund.sol": {
-      "lastModificationDate": 1718090159162,
-      "contentHash": "62da447d3690868cc5dcf3d1625d20d3",
+      "lastModificationDate": 1718255566453,
+      "contentHash": "9d3278ba51a37a3e41331e2e9c17f349",
       "sourceName": "src/contracts/NTPUFund.sol",
       "solcConfig": {
         "version": "0.8.26",

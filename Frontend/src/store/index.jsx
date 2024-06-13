@@ -7,6 +7,7 @@ const { setGlobalState, useGlobalState, getGlobalState } = createGlobalState({
   backModal: 'scale-0',
   deleteModal: 'scale-0',
   createProgressCellModal: 'scale-0',
+  voteModal: 'scale-0',
   closeApplicant: true,
   applicantDetails: null,
   closeProgressCell: true,

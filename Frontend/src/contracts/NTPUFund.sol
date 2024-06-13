@@ -7,8 +7,8 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 contract NTPUFund is ERC721, ERC721URIStorage {
     address public owner;
     uint public projectTax; // 稅，owner 要吃的稅 per project
+    uint public fundingInstallment; // 募資期數
     uint public projectCount;
-    uint public balance; // 合約內的餘額
     uint public tokenCounter;
     statsStruct public stats;
     projectStruct[] projects;
@@ -52,6 +52,8 @@ contract NTPUFund is ERC721, ERC721URIStorage {
         uint cost; // request money
         uint raised; // money already gained
         uint timestamp;
+        uint duration;
+        uint fundReviewAt;
         uint expiresAt;
         uint backers;
         statusEnum status;
@@ -74,10 +76,11 @@ contract NTPUFund is ERC721, ERC721URIStorage {
         uint256 timestamp
     );
 
-    constructor(uint _projectTax) ERC721("NtpuFund", "NTPU") {
+    constructor(uint _projectTax, uint _fundingInstallment) ERC721("NtpuFund", "NTPU") {
         tokenCounter = 0;
         owner = msg.sender;
         projectTax = _projectTax;
+        fundingInstallment = _fundingInstallment;
     }
 
     function _createCollectible(address to, string memory uri) internal returns (uint) {
@@ -134,6 +137,7 @@ contract NTPUFund is ERC721, ERC721URIStorage {
         string memory description,
         string memory imageURL,
         uint cost,
+        uint duration,
         uint expiresAt
     ) public creatorOrOwnerOnly returns (bool) {
         require(bytes(title).length > 0, "Title cannot be empty");
@@ -151,6 +155,8 @@ contract NTPUFund is ERC721, ERC721URIStorage {
         project.imageURL = imageURL;
         project.cost = cost;
         project.timestamp = block.timestamp;
+        project.duration = duration;
+        project.fundReviewAt = 0;
         project.expiresAt = expiresAt;
 
         projects.push(project);
@@ -163,56 +169,67 @@ contract NTPUFund is ERC721, ERC721URIStorage {
         return true;
     }
 
-    function updateProject(
-        uint id,
-        string memory title,
-        string memory description,
-        string memory imageURL,
-        uint expiresAt
-    ) public creatorOrOwnerOnly returns (bool) {
-        require(projectExist[id], "Project not found"); // 主播說下面那一行其實已經有確認 exist 的邏輯了，因此不需要這行
-        require(msg.sender == projects[id].owner, "Unauthorized Entity");
-        require(bytes(title).length > 0, "Title cannot be empty");
-        require(bytes(description).length > 0, "Description cannot be empty");
-        require(bytes(imageURL).length > 0, "ImageURL cannot be empty");
-
-        projects[id].title = title;
-        projects[id].description = description;
-        projects[id].imageURL = imageURL;
-        projects[id].expiresAt = expiresAt;
-
-        emit Action(id, "PROJECT UPDATED", msg.sender, block.timestamp);
-        
-        return true;
-    }
-
     function deleteProject(uint id) public creatorOrOwnerOnly returns (bool) { // TODO : 如果 project approve 了，不能刪除
         require(projectExist[id], "Project not found"); // 主播說下面那一行其實已經有確認 exist 的邏輯了，因此不需要這行
         require(
             msg.sender == projects[id].owner, "Unauthorized Entity"
         );
 
-        projects[id].status = statusEnum.DELETED;
         performRefund(id);
+        projects[id].status = statusEnum.DELETED;
 
         emit Action(id, "PROJECT DELETED", msg.sender, block.timestamp);
 
         return true;
     }
 
-    function performRefund(uint id) internal { // 退錢
+    function performRefund(uint id) public { // 退錢 // TODO : 因為匯款是分期的，所以這邊要改
+
+        require(projects[id].status != statusEnum.REVERTED 
+        && projects[id].status != statusEnum.DELETED
+        && projects[id].status != statusEnum.PAIDOUT, "Project cannot refund");
+
+        projects[id].status = statusEnum.REVERTED;
+        uint projectRaised = projects[id].raised;
+
+        uint totalContributions = 0;
+
+        for(uint i = 0; i < backersOf[id].length; i++){
+            totalContributions += backersOf[id][i].contributions;
+        }
+
         for(uint i = 0; i < backersOf[id].length; i++){
             address _owner = backersOf[id][i].owner;
             uint _contribution = backersOf[id][i].contributions;
 
             backersOf[id][i].refunded = true;
             backersOf[id][i].timestamp = block.timestamp;
-            payTo(_owner, _contribution);
 
-            projects[id].raised -= _contribution; // new
+            uint refund;
+
+            if(i == backersOf[id].length - 1){
+                refund = projects[id].raised;
+            } else {
+                refund = (projectRaised * _contribution) / totalContributions;
+            }
+
+            payTo(_owner, refund);
+
+            projects[id].raised -= refund; // new
             stats.totalBacking -= 1;
-            stats.totalDonations -= _contribution;
+            stats.totalDonations -= refund;
         }
+    }
+
+    function requestRefund(uint id, uint currentTime) public returns (bool) { // 有個沒辦法讓我只能傳送當前時間進來才可以做到
+        require(projectExist[id], "Project not found");
+        require(projects[id].expiresAt < currentTime, "Project is not expired yet"); // 限制只有過期的 project 追蹤者才能主動申請退款
+
+        performRefund(id);
+
+        emit Action(id, "PROJECT REFUNDED", msg.sender, block.timestamp);
+
+        return true;
     }
 
     function backProject(uint id) public payable returns (bool) {
@@ -240,7 +257,6 @@ contract NTPUFund is ERC721, ERC721URIStorage {
         }
             
         if(block.timestamp >= projects[id].expiresAt){
-            projects[id].status = statusEnum.REVERTED;
             performRefund(id);
             return true;
         }
@@ -248,47 +264,50 @@ contract NTPUFund is ERC721, ERC721URIStorage {
         return true;
     }
 
-    function performPayout(uint id) internal {
+    function performUnitPayout(uint id, uint installment) internal {
+
         uint _projectRaised = projects[id].raised;
-        uint _tax = (_projectRaised * projectTax) / 100;
+        uint _projectCost = projects[id].cost;
+        uint _tax = (_projectCost * projectTax) / (100 * fundingInstallment);
 
-        projects[id].status = statusEnum.PAIDOUT;
+        if(installment == fundingInstallment - 1){
 
-        payTo(owner, _tax);
-        payTo(projects[id].owner, _projectRaised - _tax);
+            projects[id].status = statusEnum.PAIDOUT;
 
-        balance -= projects[id].raised;
+            payTo(owner, _tax);
+            payTo(projects[id].owner, _projectRaised - _tax); // 剩餘得錢都給 project owner
 
-        emit Action(id, "PROJECT PAIDOUT", msg.sender, block.timestamp);
+            projects[id].raised -= _projectRaised;
+
+            emit Action(id, "PROJECT PAIDOUT", msg.sender, block.timestamp);
+
+        } else {
+
+            payTo(owner, _tax);
+            payTo(projects[id].owner, (_projectCost / fundingInstallment) - _tax);
+
+            projects[id].raised -= _projectCost / fundingInstallment;
+
+            emit Action(id, "PROJECT PAID UNIT", msg.sender, block.timestamp);
+
+        }
     }
 
-    function requestRefund(uint id) public returns (bool){ // TODO : 沒有實做到
-        require(
-            projects[id].status != statusEnum.REVERTED || 
-            projects[id].status != statusEnum.DELETED, 
-            "Project has marked as revert or delete"
-        );
+    function payOutProjectOneUnit(uint id, uint installment) public returns (bool){ // owner 主動執行 payout
+        require(projects[id].status == statusEnum.PROGRESSING, "Project is not progressing yet"); 
+        require(installment <= fundingInstallment - 1, "Invalid installment"); // 因為在 start project 的時候，已經有付款過一次了，所以這邊要減一
 
-        projects[id].status = statusEnum.REVERTED;
-        performRefund(id);
-        return true;
-    }
+        performUnitPayout(id, installment);
+        projects[id].timestamp = block.timestamp;
+        projects[id].fundReviewAt = projects[id].timestamp + projects[id].duration / (fundingInstallment - 1); // 更新下一次付款時間
+        projects[id].expiresAt = projects[id].fundReviewAt + 5 minutes; // TODO : 這個是給予的緩衝時間
 
-    function payOutProject(uint id) public returns (bool){ // owner 主動執行 payout
-        require(projects[id].status == statusEnum.APPROVED, "Project is not approved yet"); //TODO : 狀態要改，因為現在不是達標就直接匯錢
-        require(
-            msg.sender == projects[id].owner || 
-            msg.sender == owner, 
-            "Unauthorized Entity"
-        );
-
-        performPayout(id);
         return true;
     }
 
     function startProject(uint id) public creatorOrOwnerOnly returns (bool) {
         require(projectExist[id], "Project not found");
-        require(projects[id].status == statusEnum.APPROVED, "Project is not approved yet");
+        require(projects[id].status == statusEnum.APPROVED, "Project is not approved yet"); //TODO : 如果 expire 了不應該啟動
         require(
             msg.sender == projects[id].owner || 
             msg.sender == owner,  // TODO : 暫時先讓 app owner 也可以 start project
@@ -297,6 +316,7 @@ contract NTPUFund is ERC721, ERC721URIStorage {
         
         projectMint(id);
         projects[id].status = statusEnum.PROGRESSING;
+        payOutProjectOneUnit(id, 0); // 第一次付款，周轉金
 
         return true;
     }
@@ -317,8 +337,12 @@ contract NTPUFund is ERC721, ERC721URIStorage {
 
     function getBackers(uint id) public view returns (backerStruct[] memory) {
         require(projectExist[id], "Project not found");
-
         return backersOf[id];
+    }
+
+    function getBackersLength(uint id) external view returns (uint) {
+        require(projectExist[id], "Project not found");
+        return backersOf[id].length;
     }
 
     function getNfts(address _owner) public view returns (string[] memory) {
@@ -333,7 +357,14 @@ contract NTPUFund is ERC721, ERC721URIStorage {
 
         return nfts;
     }
-    
+
+    function getFundingInstallment() public view returns (uint) {
+        return fundingInstallment;
+    }
+
+    function getBlockTime() public view returns (uint) { // TODO : For debug
+        return block.timestamp;
+    }
 
     function payTo(address to, uint256 amount) internal {
         (bool success, ) = payable(to).call{value: amount}("");
@@ -355,5 +386,10 @@ contract NTPUFund is ERC721, ERC721URIStorage {
     function isProjectCreator(uint id, address addr) public view returns (bool) {
         require(projectExist[id], "Project not found");
         return projects[id].owner == addr; // 因為 id 剛好等於 project's index
+    }
+
+    function isExpired(uint id) public view returns (bool) {
+        require(projectExist[id], "Project not found");
+        return block.timestamp >= projects[id].expiresAt;
     }
 }

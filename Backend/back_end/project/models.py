@@ -1,5 +1,6 @@
 from django.db import models
 from django.dispatch import receiver
+from django.conf import settings
 from django.db.models.signals import post_delete
 from django.utils import timezone
 
@@ -20,11 +21,12 @@ class ProgressCell(models.Model):
             return 1
         else:
             return no + 1
+
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     progress_cell_id = models.AutoField(primary_key=True, default=number, editable=False)
     progress_cell_title = models.CharField(max_length=100)
     progress_cell_description = models.TextField(default='no description')
-    progress_cell_upload_date = models.DateTimeField(default=timezone.now)
+    progress_cell_upload_date = models.DateTimeField(default=timezone.now())
 
     REQUIERD_FIELDS = ['project', 'progress_cell_id', 'progress_cell_title']
     

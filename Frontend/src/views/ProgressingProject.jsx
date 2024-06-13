@@ -3,6 +3,8 @@ import { useParams } from 'react-router-dom'
 import ProgressCells from '../components/ProgressCells'
 import CreateProgressCell from '../components/CreateProgressCell'
 import ProgressCellDetails from '../components/ProgressCellDetails'
+import ProgressMeta from '../components/ProgressMeta'
+import Vote from '../components/Vote'
 import { requestProgress, requestLogin } from '../services/user'
 
 function ProgressingProject() {
@@ -45,9 +47,11 @@ function ProgressingProject() {
 
     return (
         <>
+            <ProgressMeta projectId={id} />
             <ProgressCells projectId={id} progress={progress} />
             <CreateProgressCell projectId={id} />
             <ProgressCellDetails projectId={id} />
+            <Vote projectId={id} />
         </>
     )
 }

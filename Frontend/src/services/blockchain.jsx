@@ -1,5 +1,7 @@
 import NTPUFundabi from '../abis/src/contracts/NTPUFund.sol/NTPUFund.json';
+import NTPUVoteabi from '../abis/src/contracts/NTPUVote.sol/NTPUVote.json';
 import ntpuFund_address from '../abis/NTPUFundContractAddress.json';
+import ntpuVote_address from '../abis/NTPUVoteContractAddress.json';
 import { getGlobalState, setGlobalState } from '../store';
 import { ethers } from 'ethers';
 
@@ -7,6 +9,8 @@ import { ethers } from 'ethers';
 const { ethereum } = window;
 const NTPUFundContractAddress = ntpuFund_address.address;
 const NTPUFundContractAbi = NTPUFundabi.abi;
+const NTPUVoteContractAddress = ntpuVote_address.address;
+const NTPUVoteContractAbi = NTPUVoteabi.abi;
 
 const connectWallet = async () => {
   try {
@@ -62,7 +66,7 @@ const getSignature = async (message) => {
 
 }
 
-const getEtheriumContract = async () => {
+const getNTPUFundContract = async () => {
   const contract = getGlobalState('contract');
 
   if (contract === null) {
@@ -78,50 +82,36 @@ const getEtheriumContract = async () => {
   }
 };
 
+const getNTPUVoteContract = async () => {
+  const provider = new ethers.providers.Web3Provider(ethereum);
+  const signer = provider.getSigner();
+  const contract = new ethers.Contract(NTPUVoteContractAddress, NTPUVoteContractAbi, signer);
+  return contract;
+}
+
 const createProject = async ({
   title,
   description,
   imageURL,
   cost,
+  duration,
   expiresAt,
 }) => {
   try {
     if (!ethereum) return alert('Please install Metamask');
     // console.log('Creating project...');
-    const contract = await getEtheriumContract();
+    const contract = await getNTPUFundContract();
     cost = ethers.utils.parseEther(cost); // 從 integer 轉成 wei ( 而我們 integer 使用的單位是 Ether )
-    await contract.createProject(title, description, imageURL, cost, expiresAt);
-    // console.log('Creat over.');
-    // await tx.wait();
-    // await loadProjects();
+    await contract.createProject(title, description, imageURL, cost, duration, expiresAt);
   } catch (error) {
     reportError(error);
   }
 };
 
-const updateProject = async ({
-  id,
-  title,
-  description, // cost 沒有辦法更新喔喔
-  imageURL,
-  expiresAt,
-}) => {
-  try {
-    if (!ethereum) return alert('Please install Metamask')
-
-    const contract = await getEtheriumContract()
-    await contract.updateProject(id, title, description, imageURL, expiresAt)
-    // await tx.wait()
-    // await loadProject(id)
-  } catch (error) {
-    reportError(error)
-  }
-}
-
 const deleteProject = async (id) => {
   try {
     if (!ethereum) return alert('Please install Metamask')
-    const contract = await getEtheriumContract()
+    const contract = await getNTPUFundContract()
     await contract.deleteProject(id)
   } catch (error) {
     reportError(error)
@@ -132,7 +122,7 @@ const payoutProject = async (id) => {
   try {
     if (!ethereum) return alert('Please install Metamask');
     const connectedAccount = getGlobalState('connectedAccount');
-    const contract = await getEtheriumContract();
+    const contract = await getNTPUFundContract();
 
     await contract.payOutProject(id, {
       from: connectedAccount, // msg.sender
@@ -149,7 +139,7 @@ const startProject = async (id) => {
   try {
     if (!ethereum) return alert('Please install Metamask');
     const connectedAccount = getGlobalState('connectedAccount');
-    const contract = await getEtheriumContract();
+    const contract = await getNTPUFundContract();
 
     await contract.startProject(id, {
       from: connectedAccount, // msg.sender
@@ -162,12 +152,22 @@ const startProject = async (id) => {
   }
 }
 
+const createFundReview = async (projectId) => {
+  try {
+    if (!ethereum) return alert('Please install Metamask');
+    const contract = await getNTPUVoteContract();
+    await contract.createFundReview(projectId);
+  } catch (error) {
+    reportError(error);
+  }
+}
+
 const loadProjects = async () => {
   try {
     if (!ethereum) return alert('Please install Metamask');
 
     // console.log('Loading projects...');
-    const contract = await getEtheriumContract();
+    const contract = await getNTPUFundContract();
     const projects = await contract.getProjects();
     console.log('projects', projects);
     const stats = await contract.stats();
@@ -185,10 +185,8 @@ const loadProjects = async () => {
 const loadProject = async (id) => {
   try {
     if (!ethereum) return alert('Please install Metamask');
-    const contract = await getEtheriumContract();
+    const contract = await getNTPUFundContract();
     const project = await contract.getProject(id);
-
-    // console.log('project', project);
 
     setGlobalState('project', structuredProjects([project])[0]);
   } catch (error) {
@@ -201,7 +199,7 @@ const backProject = async (id, amount) => {
   try {
     if (!ethereum) return alert('Please install Metamask');
     const connectedAccount = getGlobalState('connectedAccount');
-    const contract = await getEtheriumContract();
+    const contract = await getNTPUFundContract();
     amount = ethers.utils.parseEther(amount);
 
     await contract.backProject(id, {
@@ -216,10 +214,40 @@ const backProject = async (id, amount) => {
   }
 };
 
+const voteReview = async (projectId, option) => {
+  try {
+    if (!ethereum) return alert('Please install Metamask');
+    const connectedAccount = getGlobalState('connectedAccount');
+    const contract = await getNTPUVoteContract();
+
+    await contract.vote(projectId, option, {
+      from: connectedAccount,
+    });
+ } catch (error) {
+  reportError(error);
+ }
+}
+
+const requestRefund = async (project) => {
+  try {
+    if (!ethereum) return alert('Please install Metamask');
+    const connectedAccount = getGlobalState('connectedAccount');
+    const contract = await getNTPUFundContract();
+
+    await contract.requestRefund(project.id, Math.floor(new Date().getTime() / 1000), {
+      from: connectedAccount,
+    });
+
+  } catch (error) {
+    reportError(error)
+  }
+  
+}
+
 const getBackers = async (id) => {
   try {
     if (!ethereum) return alert('Please install Metamask');
-    const contract = await getEtheriumContract();
+    const contract = await getNTPUFundContract();
     let backers = await contract.getBackers(id);
 
     setGlobalState('backers', structuredBackers(backers))
@@ -233,7 +261,7 @@ const getNFTs = async (address) => {
   try {
     if (!ethereum) return alert('Please install Metamask');
 
-    const contract = await getEtheriumContract();
+    const contract = await getNTPUFundContract();
     let result = await contract.getNfts(address);
     let nfts = [];
 
@@ -245,13 +273,40 @@ const getNFTs = async (address) => {
   } catch (error) {
     reportError(error);
   }
+}
+
+const getFundingInstallment = async () => {
+  try {
+    if (!ethereum) return alert('Please install Metamask');
+
+    const contract = await getNTPUFundContract();
+    let result = await contract.getFundingInstallment(); // 這個回傳是一個 bignumber
+
+
+    return result.toNumber();
+  } catch (error) {
+    reportError(error);
+  }
+}
+
+const getFundReviews = async (projectId) => {
+  try {
+    if (!ethereum) return alert('Please install Metamask');
+
+    const contract = await getNTPUVoteContract();
+    let fundReviews = await contract.getFundReviews(projectId);
+
+    return structureFundReviews(fundReviews);
+  } catch (error) {
+    reportError(error);
+  }
 
 }
 
 const isAppOwner = async (account) => {
   try {
     if(!ethereum) return alert('Please install Metamask');
-    const contract = await getEtheriumContract();
+    const contract = await getNTPUFundContract();
 
     if(account === ""){
       return false;
@@ -269,11 +324,13 @@ const isAppOwner = async (account) => {
 const isCreator = async (account) => {
   try {
     if(!ethereum) return alert('Please install Metamask');
-    const contract = await getEtheriumContract();
+    const contract = await getNTPUFundContract();
 
     if(account === ""){
       return false;
     }
+
+    console.log('account', account); 
 
     let result = await contract.isCreator(account);
 
@@ -287,7 +344,7 @@ const isCreator = async (account) => {
 const isProjectCreator = async (projectId, account) => {
   try {
     if(!ethereum) return alert('Please install Metamask');
-    const contract = await getEtheriumContract();
+    const contract = await getNTPUFundContract();
 
     if(account === ""){
       return false;
@@ -301,10 +358,24 @@ const isProjectCreator = async (projectId, account) => {
   }
 }
 
+const isProjectFundReviewing = async (projectId) => {
+  try {
+    
+    if(!ethereum) return alert('Please install Metamask');
+    const contract = await getNTPUVoteContract();
+
+    let result = await contract.isFundReviewing(projectId);
+
+    return result;
+ } catch (error) {
+  reportError(error);
+ }
+}
+
 
 const structuredBackers = (backers) =>
   backers.map((backer) => ({
-    owner: backer.owner.toLowerCase(), // backer.owner 是指 backer 的 address
+    owner: backer.owner, // backer.owner 是指 backer 的 address
     refunded: backer.refunded,
     timestamp: new Date(backer.timestamp.toNumber() * 1000).toJSON(),
     contribution: parseInt(backer.contributions._hex) / 10 ** 18, // Ether
@@ -320,7 +391,10 @@ const structuredProjects = (projects) =>
       description: project.description,
       timestamp: new Date(project.timestamp.toNumber()).getTime(),
       expiresAt: new Date(project.expiresAt.toNumber()).getTime(),
-      date: toDate(project.expiresAt.toNumber() * 1000),
+      fundReviewAt: new Date(project.fundReviewAt.toNumber()).getTime(),
+      duration: project.duration.toNumber(),
+      date: formatTimestamp(project.expiresAt.toNumber() * 1000),
+      reviewDate: formatTimestamp(project.fundReviewAt.toNumber() * 1000),
       imageURL: project.imageURL,
       raised: parseInt(project.raised._hex) / 10 ** 18, // Ether
       cost: parseInt(project.cost._hex) / 10 ** 18, // Ether
@@ -338,11 +412,42 @@ const toDate = (timestamp) => {
   return `${yyyy}-${mm}-${dd}`
 };
 
+function formatTimestamp(timestamp) {
+    const date = new Date(timestamp);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1; // Months are 0-based in JavaScript
+    const day = date.getDate();
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const seconds = date.getSeconds();
+
+    // Pad single digit numbers with a leading zero
+    const paddedMonth = month < 10 ? `0${month}` : month;
+    const paddedDay = day < 10 ? `0${day}` : day;
+    const paddedHours = hours < 10 ? `0${hours}` : hours;
+    const paddedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+    const paddedSeconds = seconds < 10 ? `0${seconds}` : seconds;
+
+    return `${year}-${paddedMonth}-${paddedDay} ${paddedHours}:${paddedMinutes}:${paddedSeconds}`;
+}
+
 const structureStats = (stats) => ({
   totalProject: stats.totalProject.toNumber(),
   totalBacking: stats.totalBacking.toNumber(),
   totalDonations: parseInt(stats.totalDonations) / 10 ** 18,
 });
+
+const structureFundReviews = (fundReviews) => 
+  fundReviews
+  .map((fundReview) => ({
+      fundReviewId: fundReview.fundReviewId.toNumber(),
+      projectId: fundReview.projectId.toNumber(),
+      startDate: new Date(fundReview.startDate.toNumber()).getDate(),
+      endDate: new Date(fundReview.endDate.toNumber()).getDate(),
+      passCount: fundReview.passCount.toNumber(),
+      totalVoteCount: fundReview.totalVoteCount.toNumber(),
+    }))
+    .reverse()
 
 const reportError = (error) => {
   console.error(error.message);
@@ -354,16 +459,21 @@ export {
   isWallectConnected,
   getSignature,
   createProject,
-  updateProject,
+  createFundReview,
   deleteProject,
   backProject,
+  voteReview,
+  requestRefund,
   payoutProject,
   startProject,
   getBackers,
   getNFTs,
+  getFundingInstallment,
+  getFundReviews,
   isAppOwner,
   isCreator,
   isProjectCreator,
+  isProjectFundReviewing,
   loadProjects,
   loadProject
 };

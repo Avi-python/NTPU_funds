@@ -1,22 +1,29 @@
 import { useEffect, useState } from 'react'
 import { useGlobalState } from '../store'
-import { getNFTs} from '../services/blockchain'
+import { getNFTs, isProjectFundReviewing } from '../services/blockchain'
 import { Link } from 'react-router-dom';
 
 function FollowNFT() {
 
     const [connectedAccount] = useGlobalState('connectedAccount');
     const [nfts, setNFTs] = useState(null);
+    const [isFundReviewings, setIsFundReviewings] = useState([]); 
 
     useEffect(() => {
         async function loadNFTs() {
             const result = await getNFTs(connectedAccount);
+            let tmp = [];
+            for(let i = 0; i < result.length; i++) {
+                const res = await isProjectFundReviewing(result[i].id);
+                tmp.push(res);
+            }
+            setIsFundReviewings(tmp);
             setNFTs(result);
         }
         loadNFTs();
     }, [connectedAccount])
   
-  if(nfts === null  ) {
+  if(nfts === null) {
     return (
       <div className="py-24 px-6 flex justify-center">
         loading NFTs... 
@@ -29,7 +36,7 @@ function FollowNFT() {
       <div className="flex justify-center items-center flex-wrap">
         {nfts
           .map((nft, i) => (
-            <NFTCard key={i} nft={nft} />
+            <NFTCard key={i} nft={nft} isFundReviewing={isFundReviewings[i]} />
           ))}
       </div>
 
@@ -49,11 +56,9 @@ function FollowNFT() {
   )
 }
 
-const NFTCard = ({ nft }) => {
+const NFTCard = ({ nft, isFundReviewing }) => {
 
-  // const isExpired = new Date().getTime() > Number(project?.expiresAt + '000');
-
-  return <div id="nft" className="shadow-lg bg-yellow-200 w-64 sm:w-80 m-4" style={{borderTopLeftRadius: '9999px', borderTopRightRadius: '9999px'}}>
+  return <div id="nft" className={`$shadow-lg ${isFundReviewing ? 'bg-emerald-200' : 'bg-yellow-200'} w-64 sm:w-80 m-4`} style={{borderTopLeftRadius: '9999px', borderTopRightRadius: '9999px'}}>
       <Link to={`/progressing_project/${nft.id}`}>
         <img
           src={nft.imageURL}

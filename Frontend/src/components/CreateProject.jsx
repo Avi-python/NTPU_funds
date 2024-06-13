@@ -10,6 +10,9 @@ const CreateProject = () => {
     const [description, setDescription] = useState('');
     const [cost, setCost] = useState('');
     const [date, setDate] = useState('');
+    const [days, setDays] = useState(0);
+    const [hours, setHours] = useState(0);
+    const [minutes, setMinutes] = useState(0);
     const [imageURL, setImageURL] = useState('');
 
     const toTimestamp = (dateStr) => {
@@ -19,12 +22,13 @@ const CreateProject = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault(); //  防止表單提交的默認行為 ( 默認行為會刷新頁面 )
-        if (!title || !description || !cost || !date || !imageURL) return;
+        if (!title || !description || !cost || (days == 0 && hours == 0 && minutes == 0) || !date || !imageURL) return;
 
         const params = {
             title,
             description,
             cost,
+            duration: days * 24 * 60 * 60 + hours * 60 * 60 + minutes * 60,
             expiresAt: toTimestamp(date),
             imageURL
         };
@@ -49,6 +53,9 @@ const CreateProject = () => {
         setDescription('');
         setCost('');
         setDate('');
+        setDays(0);
+        setHours(0);
+        setMinutes(0);
         setImageURL('');
     };
 
@@ -118,6 +125,48 @@ const CreateProject = () => {
                         />
                     </div>
 
+                    <div className="flex flex-wrap justify-between items-center rounded-xl">
+                        <div className="flex-1 flex flex-col mr-4 mt-4">
+                            <small className="ml-1">Days</small>
+                            <input className=" bg-gray-300 rounded-xl
+                            border-0 text-sm text-slate-500 focus:outline-none focus:ring-0"
+                                type="number"
+                                step={1}
+                                min={0}
+                                name="days"
+                                placeholder="Days"
+                                onChange={(e) => setDays(e.target.value)}
+                                value={days}
+                            />
+                        </div>
+                        <div className="flex-1 flex flex-col mr-4 mt-4">
+                            <small className="ml-1">Hours</small>
+                            <input className="flex-1 bg-gray-300 rounded-xl
+                            border-0 text-sm text-slate-500 focus:outline-none focus:ring-0"
+                                type="number"
+                                step={1}
+                                min={0}
+                                name="hours"
+                                placeholder="hours"
+                                onChange={(e) => setHours(e.target.value)}
+                                value={hours}
+                            />
+                        </div>
+                        <div className="flex-1 flex flex-col mr-4 mt-4">
+                            <small className="ml-1">Minutes</small>
+                            <input className="flex-1 bg-gray-300 rounded-xl
+                            border-0 text-sm text-slate-500 focus:outline-none focus:ring-0"
+                                type="number"
+                                step={1}
+                                min={0}
+                                name="minutes"
+                                placeholder="minutes"
+                                onChange={(e) => setMinutes(e.target.value)}
+                                value={minutes}
+                            />
+                        </div>
+                    </div>
+
                     <div className="flex justify-between items-center bg-gray-300 rounded-xl mt-5">
                         <input className="block w-full bg-transparent
                         border-0 text-sm text-slate-500 focus:outline-none focus:ring-0"
@@ -126,7 +175,6 @@ const CreateProject = () => {
                             placeholder="Image URL..."
                             onChange={(e) => setImageURL(e.target.value)}
                             value={imageURL}
-                            required
                         />
                     </div>
 

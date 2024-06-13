@@ -1,5 +1,6 @@
 from django.shortcuts import render
-from django.http import JsonResponse, response, FileResponse, HttpResponse
+from django.http import JsonResponse
+from django.utils import timezone
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, parser_classes, permission_classes
@@ -71,7 +72,7 @@ def getProgress(request):
             'title': cell.progress_cell_title,
             'description': cell.progress_cell_description,
             'files': [doc.file.name for doc in cell.progresscelldoc_set.all()],
-            'upload_date': cell.progress_cell_upload_date.strftime('%Y-%m-%d %H:%M:%S')
+            'upload_date': (cell.progress_cell_upload_date).astimezone(timezone.get_default_timezone()).strftime('%Y-%m-%d %H:%M:%S')
         })
 
     return JsonResponse({'progress': result}, status=200)

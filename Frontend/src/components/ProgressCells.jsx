@@ -14,8 +14,6 @@ function ProgressingProjectDetails({ projectId, progress }) {
     checkCreator();
   }, [account, projectId, progress]);
 
-  console.log("creatorBool:", creatorBool);
-
   return (
     <div className="py-24 px-6 flex flex-col justify-center">
       
@@ -54,7 +52,6 @@ function ProgressingProjectDetails({ projectId, progress }) {
             </thead>
             <tbody>
               {progress != null && progress.length > 0 ? progress.map((progressCell, i) => {
-                console.log("progressCell:", progressCell);
                 return <ProgressCell key={i} progressCell={progressCell} />
               }) : null}
             </tbody>

@@ -5,7 +5,7 @@ import { daysRemaining } from '../store'
 import { FaEthereum } from 'react-icons/fa'
 
 
-function ProgressingProjects() {
+function ProgressingProjects({ isFundReviewings }) {
 
     const [end, setEnd] = useState(4);
     const [count] = useState(4);
@@ -22,7 +22,7 @@ function ProgressingProjects() {
         {collection
           .map((project, i) => {
             if(project.status === 4 && project.owner === window.ethereum.selectedAddress.toLowerCase()){
-              return <ProjectCard key={i} project={project} />
+              return <ProjectCard key={i} project={project} isFundReviewing={isFundReviewings[i]}/>
             }
           })}
       </div>
@@ -30,18 +30,27 @@ function ProgressingProjects() {
   )
 }
 
-const ProjectCard = ({ project }) => {
+const ProjectCard = ({ project, isFundReviewing }) => {
 
     const isExpired = new Date().getTime() > Number(project?.expiresAt + '000');
+    const currentTimestamp = Math.floor(Date.now() / 1000);
+    const needReview = currentTimestamp >= project?.fundReviewAt && currentTimestamp < project?.expiresAt;
   
-    return <div id="projects" className="rounded-lg shadow-lg bg-white w-64 sm:w-80 m-4">
+  return <div id="projects" className={`rounded-lg shadow-lg ${isFundReviewing ? 'bg-emerald-200' : isExpired ? 'bg-red-400' : 'bg-white'} w-64 sm:w-80 m-4`}>
       <Link to={"/progressing_project/" + project.id}> {/* project 本身有 id */}
+
         <img
           src={project.imageURL}
           alt={project.title}
           className="rounded-xl h-64 sm:h-80 w-full object-cover"
         />
   
+        { needReview ?
+        <div className="mt-1 p-4 bg-blue-400 rounded-xl">
+          <p className="text-black font-bold text-center">Needs FundReview</p>
+        </div>
+        : null} 
+
         <div className="p-4">
           <h5>{project.title}</h5>
   
@@ -89,7 +98,7 @@ const ProjectCard = ({ project }) => {
                             ? (<small className='text-blue-500'>Progressing</small>)
                             :
                             (
-                              <small className='text-orange-500'>Paid</small>
+                              <small className='text-orange-500'>Paid Out</small>
                             )
               }
             </div>

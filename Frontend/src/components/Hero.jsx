@@ -12,6 +12,8 @@ const Hero = () => {
         async function checkCreator() {
             const is_owner = await isAppOwner(connectedAccount);
             const is_creator = await isCreator(connectedAccount);
+            console.log('is_creator: ', is_creator);
+            console.log('is_owner: ', is_owner);
             setIsCreatorOrOwner(is_creator || is_owner);
         }
         checkCreator();

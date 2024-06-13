@@ -3,7 +3,6 @@ import BackProject from "../components/BackProject"
 import DeleteProject from "../components/DeleteProject"
 import ProjectBackers from "../components/ProjectBackers"
 import ProjectDetails from "../components/ProjectDetails"
-import UpdateProject from '../components/UpdateProject'
 import { loadProject, getBackers } from "../services/blockchain"
 import { useParams } from "react-router-dom"
 import { useGlobalState } from "../store"
@@ -28,7 +27,6 @@ const Project = () => {
       {loaded ? (
         <>
           <ProjectDetails project={project} />
-          <UpdateProject project={project} />
           <DeleteProject project={project} />
           <BackProject project={project} />
           <ProjectBackers backers={backers} />
