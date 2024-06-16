@@ -12,8 +12,8 @@
 
 4. 需再兩個地方調整鏈的 url
    
-- hardhat.config.js : 將裡面 localhost.url 改成這個鏈的 url
-- 在 Backend/backend/settings.py 裡面有一個 BLOCKCHAIN_URL，改成這個鏈的 url
+- 在等一下 Backend/backend/ 目錄下所創建的 .env file 裡面有一個 BLOCKCHAIN_URL，改成這個鏈的 url
+- 在等一下 frontend/ 目錄下所創建的 .env file 裡面有一個 BLOCKCHAIN_URL，改成這個鏈的 url
 
 ## Backend
 
@@ -54,6 +54,7 @@ python manage.py migrate
 ```plain
 ACCOUNT_PRIVATE_KEY="8502a5282bec6a2db9cab10baed69503705acfa3356ff76aa40454a95453b830"
 ACCOUNT="0x8fbEf15EbAF7129959eFFedbcd409F26483Ce114" 
+BLOCKCHAIN_URL="http://localhost:7545"
 ```
 
 6. 照著以上配置完，應該就可以運行後端了
@@ -81,7 +82,8 @@ yarn install
 - 
 ```plain
 REACT_APP_SERVER_URL="http://localhost:8000"
-APP_OWNER_PRIVATE_KEY="8502a5282bec6a2db9cab10baed69503705acfa3356ff76aa40454a95453b830"
+APP_OWNER_PRIVATE_KEY="2886a1bce24cca864a17bc6e06ca82351a69d64cefa47b29ef9654b72c9ae86b"
+BLOCKCHAIN_URL="http://127.0.0.1:7545"
 ```
 
 4. 啟動 ganache UI，並在 frontend 目錄下執行以下指令部屬合約

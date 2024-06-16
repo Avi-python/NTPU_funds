@@ -30,13 +30,11 @@ SECRET_KEY = 'django-insecure-+5tc=!6u+vdb2$zikug0cmwxb*)t9xpx!*q0vx=v!ujg=8%d$r
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-BLOCKCHAIN_URL = 'http://localhost:9545'
-
+BLOCKCHAIN_URL = os.getenv("BLOCKCHAIN_URL")
 ACCOUNT_PRIVATE_KEY = os.getenv("ACCOUNT_PRIVATE_KEY")
 ACCOUNT = os.getenv("ACCOUNT")
 
 ALLOWED_HOSTS = []
-
 
 # Application definition
 

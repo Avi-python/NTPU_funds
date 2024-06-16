@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import JsonResponse
+from django.http import JsonResponse, FileResponse
 from django.utils import timezone
 
 from rest_framework.permissions import IsAuthenticated

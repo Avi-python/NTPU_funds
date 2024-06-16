@@ -7,7 +7,7 @@ module.exports = {
   defaultNetwork: 'localhost',
   networks: {
     localhost: {
-      url: 'http://127.0.0.1:9545',
+      url: process.env.BLOCKCHAIN_URL,
       accounts: ["0x" + process.env.APP_OWNER_PRIVATE_KEY]
     },
   },
